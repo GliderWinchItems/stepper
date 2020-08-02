@@ -28,6 +28,7 @@
 #include "yprintf.h"
 #include "shiftregbits.h"
 #include "spiserialparallelSW.h"
+#include "stepper_items.h"
 
 
 /* From 'main.c' */
@@ -177,6 +178,12 @@ void StartGevcuTask(void const * argument)
 	/* Start command/keep-alive timer */
 	BaseType_t bret = xTimerReset(gevcufunction.swtimer1, 10);
 	if (bret != pdPASS) {morse_trap(405);}
+
+
+	/* Start stepper pulse (PU signal) timer. */
+extern TIM_HandleTypeDef htim2;
+	stepper_items_init(&htim2);
+//HAL_GPIO_TogglePin(GPIOD, LED_GREEN_Pin);
 
   /* Infinite loop */
   for(;;)

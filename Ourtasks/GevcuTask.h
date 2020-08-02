@@ -16,6 +16,7 @@
 #include "adc_idx_v_struct.h"
 #include "CanTask.h"
 
+
 /* 
 =========================================      
 CAN msgs: 
@@ -242,6 +243,8 @@ struct GEVCUFUNCTION
 
 	/* CAN msgs */
 	struct CANTXQMSG canmsg[NUMCANMSGS];
+
+
 };
 
 /* *************************************************************************/

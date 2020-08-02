@@ -26,6 +26,7 @@
 #include "control_law_v1.h"
 #include "LcdTask.h"
 #include "LcdmsgsetTask.h"
+#include "stepper_items.h"
 
 #define GEVCULCDMSGDELAY 32 // Minimum number of time ticks between LCD msgs
 #define GEVCULCDMSGLONG (128*30) // Very long delay
@@ -162,9 +163,9 @@ void GevcuStates_GEVCU_INIT(void)
  * *************************************************************************/
 //  20 chars will over-write all display chars from previous msg:             12345678901234567890
 static void lcdi2cmsg3a(union LCDSETVAR u){lcdi2cputs(&punitd4x20,GEVCUTSK,0,"GEVCU_SAFE_TRANSITIO");}
-static void lcdi2cmsg3b(union LCDSETVAR u){lcdi2cputs(&punitd4x20,GEVCUTSK,0,"WAIT CONTACTOR OPEN ");}
-static void lcdi2cmsg3c(union LCDSETVAR u){lcdi2cputs(&punitd4x20,GEVCUTSK,0,"CONTACTOR NO-RESPONS");}
-static void lcdi2cmsg3d(union LCDSETVAR u){lcdi2cputs(&punitd4x20,GEVCUTSK,0,"CONTACTOR NOT INITed");}
+//static void lcdi2cmsg3b(union LCDSETVAR u){lcdi2cputs(&punitd4x20,GEVCUTSK,0,"WAIT CONTACTOR OPEN ");}
+//static void lcdi2cmsg3c(union LCDSETVAR u){lcdi2cputs(&punitd4x20,GEVCUTSK,0,"CONTACTOR NO-RESPONS");}
+//static void lcdi2cmsg3d(union LCDSETVAR u){lcdi2cputs(&punitd4x20,GEVCUTSK,0,"CONTACTOR NOT INITed");}
 
 void GevcuStates_GEVCU_SAFE_TRANSITION(void)
 {
@@ -195,45 +196,53 @@ void GevcuStates_GEVCU_SAFE_TRANSITION(void)
 	cntctrctl.req = CMDRESET;
 
 
-	if (cntctrctl.nrflag != 0)
-	{ // Here, contactor is not responding
-		msgslow += 1;
-		if (msgslow >= 48)
-		{ 
-			msgslow = 0;
-			lcdi2cfunc.ptr = lcdi2cmsg3c; 
-   			xQueueSendToBack(LcdmsgsetTaskQHandle, &lcdi2cfunc, 0);
-   		}
-		return;
-	}
+//	if (cntctrctl.nrflag != 0)
+//	{ // Here, contactor is not responding
+//		msgslow += 1;
+//		if (msgslow >= 48)
+//		{ 
+//			msgslow = 0;
+//			lcdi2cfunc.ptr = lcdi2cmsg3c; 
+  // 			xQueueSendToBack(LcdmsgsetTaskQHandle, &lcdi2cfunc, 0);
+   	//	}
+	//	return;
+//	}
 
-	if ((cntctrctl.cmdrcv & 0xf) == OTOSETTLING)
-	{ // Waiting for contactor initialization "settling"
-		msgslow += 1;
-		if (msgslow >= 48)
-		{ 
-			msgslow = 0;
-			lcdi2cfunc.ptr = lcdi2cmsg3d; 
-   			xQueueSendToBack(LcdmsgsetTaskQHandle, &lcdi2cfunc, 0);
-   		}
-		return;
-	}
+//	if ((cntctrctl.cmdrcv & 0xf) == OTOSETTLING)
+//	{ // Waiting for contactor initialization "settling"
+//		msgslow += 1;
+//		if (msgslow >= 48)
+//		{ 
+//			msgslow = 0;
+//			lcdi2cfunc.ptr = lcdi2cmsg3d; 
+  // 			xQueueSendToBack(LcdmsgsetTaskQHandle, &lcdi2cfunc, 0);
+   	//	}
+	//	return;
+//	}
 
 
-	/* Wait until contactor shows DISCONNECTED state. */
-	if ((cntctrctl.cmdrcv & 0xf) != DISCONNECTED)
-	{ // LCD msg here?
-		if (msgflag == 1)
-		{
-			if (LcdmsgsetTaskQHandle != NULL) 
-			{
-				lcdi2cfunc.ptr = lcdi2cmsg3b; 
-	    		xQueueSendToBack(LcdmsgsetTaskQHandle, &lcdi2cfunc, 0);
-	    		msgflag = 2;
-	    	}
-	    }
-		return;
-	}
+//	/* Wait until contactor shows DISCONNECTED state. */
+//	if ((cntctrctl.cmdrcv & 0xf) != DISCONNECTED)
+//	{ // LCD msg here?
+//		if (msgflag == 1)
+//		{
+//			if (LcdmsgsetTaskQHandle != NULL) 
+//			{
+//				lcdi2cfunc.ptr = lcdi2cmsg3b; 
+//	    		xQueueSendToBack(LcdmsgsetTaskQHandle, &lcdi2cfunc, 0);
+//	    		msgflag = 2;
+//	    	}
+//	    }
+//		return;
+//	}
+
+
+	/* Assure disable stepper controller states. */
+	HAL_GPIO_WritePin(EN_port,EN_pin, GPIO_PIN_RESET); // Disable Stepper motor
+
+	/* Default stepper motor controller direction. */
+	HAL_GPIO_WritePin(DR_port,DR_pin, GPIO_PIN_RESET); 
+
 
 	msgflag = 0; // Send LCD msg once
 
@@ -282,10 +291,10 @@ void GevcuStates_GEVCU_SAFE(void)
 		xQueueSendToBack(LEDTaskQHandle,&led_prep,portMAX_DELAY);
 
 		/* Request contactor to CONNECT. */
-		cntctrctl.req = CMDCONNECT;
+//		cntctrctl.req = CMDCONNECT;
 
 		/* Set the last received contactor response to bogus. */
-		cntctrctl.cmdrcv = 0x8f; // Connect cmd w bogus response code
+//		cntctrctl.cmdrcv = 0x8f; // Connect cmd w bogus response code
 		return;
 	}
 	return;
@@ -323,11 +332,11 @@ void GevcuStates_GEVCU_ACTIVE_TRANSITION(void)
 	}
 	
 	/* Wait for CONNECTED. */
-	if ((cntctrctl.cmdrcv & 0xf) != CONNECTED)
-	{ // Put a stalled loop timeout here?
-		cntctrctl.req = CMDCONNECT;
-		return;
-	}
+//	if ((cntctrctl.cmdrcv & 0xf) != CONNECTED)
+//	{ // Put a stalled loop timeout here?
+//		cntctrctl.req = CMDCONNECT;
+//		return;
+//	}
 
 	/* Contactor connected. */
 
@@ -369,10 +378,13 @@ void GevcuStates_GEVCU_ACTIVE(void)
 	}
 
 	/* Wait for ARM pushbutton to be pressed. */	
-	if (gevcufunction.psw[PSW_PB_ARM]->db_on != SW_CLOSED)
-		return;
+//	if (gevcufunction.psw[PSW_PB_ARM]->db_on != SW_CLOSED)
+//		return;
 	
 	/* Here, ARM_PB pressed, requesting ARMed state. */
+
+	HAL_GPIO_WritePin(EN_port,EN_pin, GPIO_PIN_SET); // Enable Stepper motor
+
 	led_arm_pb.mode = LED_ON; // ARM Pushbutton LED
 	xQueueSendToBack(LEDTaskQHandle,&led_arm_pb,portMAX_DELAY);
 
@@ -389,7 +401,7 @@ void GevcuStates_GEVCU_ACTIVE(void)
  * *************************************************************************/
 //  20 chars will over-write all display chars from previous msg:       12345678901234567890
 //static void lcdmsg7   (void)             {lcdprintf (&gevcufunction.pbuflcd3,GEVCUTSK,0,"ARM: MOVE CL ZERO   ");}
-static void lcdi2cmsg7(union LCDSETVAR u){lcdi2cputs(&punitd4x20,           GEVCUTSK,0,"ARM: MOVE CL ZERO   ");}
+//static void lcdi2cmsg7(union LCDSETVAR u){lcdi2cputs(&punitd4x20,           GEVCUTSK,0,"ARM: MOVE CL ZERO   ");}
 
 //static void lcdmsg8   (void){lcdprintf (&gevcufunction.pbuflcd3,GEVCUTSK,0,"GEVCU_ARM           ");}
 static void lcdi2cmsg8(union LCDSETVAR u){lcdi2cputs(&punitd4x20,           GEVCUTSK,0,"GEVCU_ARM           ");}
@@ -397,7 +409,7 @@ static void lcdi2cmsg8(union LCDSETVAR u){lcdi2cputs(&punitd4x20,           GEVC
 void GevcuStates_GEVCU_ARM_TRANSITION(void)
 {
 //	void (*ptr2)(void); // Pointer to queue LCD msg
-
+#ifdef USEMOVECLTOZEROLOGIC
 		/* Make sure Op has CL in zero position. */
 		if (clfunc.curpos > 0)
 		{
@@ -414,6 +426,7 @@ void GevcuStates_GEVCU_ARM_TRANSITION(void)
 			}
 			return;
 		}
+#endif		
 
 //		ptr2 = &lcdmsg8; // LCD msg pointer
 //		xQueueSendToBack(lcdmsgQHandle,&ptr2,0);
@@ -443,6 +456,7 @@ void GevcuStates_GEVCU_ARM_TRANSITION(void)
  * *************************************************************************/
 void GevcuStates_GEVCU_ARM(void)
 {
+#ifdef USETHEPREPSWITCHTOBREAKSTATE
 	/* Pressing PREP returns to ACTIVE, (not armed) state. */
 	if (gevcufunction.psw[PSW_PB_PREP]->db_on == SW_CLOSED)
 	{
@@ -451,6 +465,10 @@ void GevcuStates_GEVCU_ARM(void)
 
 		led_arm.mode = LED_OFF; // ARM state LED
 		xQueueSendToBack(LEDTaskQHandle,&led_arm,portMAX_DELAY);
+
+		/* Return stepper to disabled, safe state. */
+		HAL_GPIO_WritePin(EN_port,EN_pin, GPIO_PIN_RESET); // Disable Stepper motor
+
 
 		/* Set DMOC torque and integrator to zero. */
 		control_law_v1_reset();
@@ -464,6 +482,26 @@ void GevcuStates_GEVCU_ARM(void)
 		gevcufunction.state = GEVCU_ACTIVE_TRANSITION;
 		return;		
 	}
+	#endif
+
+	/* Use PREP switch to reverse direction. */
+	if (gevcufunction.psw[PSW_PB_PREP]->db_on == SW_CLOSED)
+	{
+		led_prep.mode = LED_ON; // PREP state led on
+		xQueueSendToBack(LEDTaskQHandle,&led_prep,portMAX_DELAY);
+HAL_GPIO_WritePin(DR_port,DR_pin, GPIO_PIN_SET); // Disable Stepper motor
+
+
+
+	}
+	else
+	{
+		led_prep.mode = LED_OFF; // PREP state led on
+		xQueueSendToBack(LEDTaskQHandle,&led_prep,portMAX_DELAY);
+HAL_GPIO_WritePin(DR_port,DR_pin, GPIO_PIN_RESET); // Disable Stepper motor
+	}		
+
+
 
 	/* Compute torque request when the GevcuEvents_04 handling of the
       timer notification called dmoc_control_time, and dmoc_control_time

@@ -138,8 +138,7 @@ void GevcuEvents_04(void)
 	gevcufunction.evstat |= EVSWTIM1TICK; // Timer tick
 
 	/* Keepalive for contactor CAN msgs. */
-	contactor_control_time(gevcufunction.swtim1ctr);
-
+//
 	/* Keepalive and torque command for DMOC */
 	dmoc_control_time(&dmocctl[DMOC_SPEED], gevcufunction.swtim1ctr);
 
@@ -170,6 +169,8 @@ struct MAILBOXCAN* pdbg07mbx;
 
 void GevcuEvents_07(void)
 {
+return;
+
 // Debugging: Copy mailbox for defaultTask display
 pdbg07mbx = gevcufunction.pmbx_cid_cntctr_keepalive_r; 
 

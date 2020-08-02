@@ -449,6 +449,10 @@ void EXTI9_5_IRQHandler(void)
 void TIM2_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM2_IRQn 0 */
+//HAL_GPIO_TogglePin(GPIOD, LED_GREEN_Pin);
+ void stepper_items_IRQHandler(TIM_HandleTypeDef *phtim2);
+  stepper_items_IRQHandler(&htim2);
+  return;
 
   /* USER CODE END TIM2_IRQn 0 */
   HAL_TIM_IRQHandler(&htim2);
