@@ -99,6 +99,8 @@ void Error_Handler(void);
 #define Control_lever_GPIO_Port GPIOC
 #define Supply_12v_Pin GPIO_PIN_2
 #define Supply_12v_GPIO_Port GPIOC
+#define StepperPulse_Pin GPIO_PIN_1
+#define StepperPulse_GPIO_Port GPIOA
 #define Supply_5v_Pin GPIO_PIN_4
 #define Supply_5v_GPIO_Port GPIOC
 #define Spare_Pin GPIO_PIN_5

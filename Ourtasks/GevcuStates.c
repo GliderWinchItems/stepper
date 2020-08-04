@@ -489,16 +489,15 @@ void GevcuStates_GEVCU_ARM(void)
 	{
 		led_prep.mode = LED_ON; // PREP state led on
 		xQueueSendToBack(LEDTaskQHandle,&led_prep,portMAX_DELAY);
-HAL_GPIO_WritePin(DR_port,DR_pin, GPIO_PIN_SET); // Disable Stepper motor
 
-
-
+		stepper_items_clupdate(0);
 	}
 	else
 	{
 		led_prep.mode = LED_OFF; // PREP state led on
 		xQueueSendToBack(LEDTaskQHandle,&led_prep,portMAX_DELAY);
-HAL_GPIO_WritePin(DR_port,DR_pin, GPIO_PIN_RESET); // Disable Stepper motor
+
+		stepper_items_clupdate(1);
 	}		
 
 
