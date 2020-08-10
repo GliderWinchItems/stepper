@@ -116,8 +116,6 @@ void Error_Handler(void);
 #define SPI2_NSS__CK_GPIO_Port GPIOB
 #define LED_GREEN_Pin GPIO_PIN_12
 #define LED_GREEN_GPIO_Port GPIOD
-#define LED_RED_Pin GPIO_PIN_13
-#define LED_RED_GPIO_Port GPIOD
 #define LED_ORANGE_Pin GPIO_PIN_14
 #define LED_ORANGE_GPIO_Port GPIOD
 #define LED_BLUE_Pin GPIO_PIN_15
