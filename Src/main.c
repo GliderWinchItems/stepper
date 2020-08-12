@@ -51,7 +51,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
-#include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -180,6 +179,8 @@ DMA_HandleTypeDef hdma_usart3_tx;
 DMA_HandleTypeDef hdma_usart6_rx;
 DMA_HandleTypeDef hdma_usart6_tx;
 
+PCD_HandleTypeDef hpcd_USB_OTG_FS;
+
 osThreadId defaultTaskHandle;
 osTimerId defaultTaskTimerHandle;
 /* USER CODE BEGIN PV */
@@ -200,6 +201,7 @@ static void MX_TIM1_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM9_Init(void);
+static void MX_USB_OTG_FS_PCD_Init(void);
 void StartDefaultTask(void const * argument);
 void CallbackdefaultTaskTimer(void const * argument);
 
@@ -285,6 +287,7 @@ int main(void)
   MX_I2C1_Init();
   MX_TIM2_Init();
   MX_TIM9_Init();
+  MX_USB_OTG_FS_PCD_Init();
   /* USER CODE BEGIN 2 */
 
 /*
@@ -350,6 +353,7 @@ DiscoveryF4 LEDs --
 	/* Setup semaphore for yprint and sprintf et al. */
 	yprintf_init();
 
+#ifdef USEUSBFORCANMSGS
 	/* USB-CDC buffering */
 	#define NUMCDCBUFF 4	// Number of CDC task local buffers
 	#define CDCBUFFSIZE 64*4	// Best buff size is multiples of usb packet size
@@ -360,6 +364,7 @@ DiscoveryF4 LEDs --
 	/* USB-CDC queue and task creation */
 	Qidret = xCdcTxTaskSendCreate(3); // arg = Priority level
 	if (Qidret < 0) morse_trap(221); // Panic LED flashing
+#endif
 
   /* definition and creation of CanTxTask - CAN driver TX interface. */
   Qidret = xCanTxTaskCreate(2, 64); // CanTask priority, Number of msgs in queue
@@ -999,6 +1004,41 @@ static void MX_USART6_UART_Init(void)
 
 }
 
+/**
+  * @brief USB_OTG_FS Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USB_OTG_FS_PCD_Init(void)
+{
+
+  /* USER CODE BEGIN USB_OTG_FS_Init 0 */
+
+  /* USER CODE END USB_OTG_FS_Init 0 */
+
+  /* USER CODE BEGIN USB_OTG_FS_Init 1 */
+
+  /* USER CODE END USB_OTG_FS_Init 1 */
+  hpcd_USB_OTG_FS.Instance = USB_OTG_FS;
+  hpcd_USB_OTG_FS.Init.dev_endpoints = 4;
+  hpcd_USB_OTG_FS.Init.speed = PCD_SPEED_FULL;
+  hpcd_USB_OTG_FS.Init.dma_enable = DISABLE;
+  hpcd_USB_OTG_FS.Init.phy_itface = PCD_PHY_EMBEDDED;
+  hpcd_USB_OTG_FS.Init.Sof_enable = DISABLE;
+  hpcd_USB_OTG_FS.Init.low_power_enable = DISABLE;
+  hpcd_USB_OTG_FS.Init.lpm_enable = DISABLE;
+  hpcd_USB_OTG_FS.Init.vbus_sensing_enable = DISABLE;
+  hpcd_USB_OTG_FS.Init.use_dedicated_ep1 = DISABLE;
+  if (HAL_PCD_Init(&hpcd_USB_OTG_FS) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USB_OTG_FS_Init 2 */
+
+  /* USER CODE END USB_OTG_FS_Init 2 */
+
+}
+
 /** 
   * Enable DMA controller clock
   */
@@ -1067,13 +1107,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOB, Stepper__DR__direction_Pin|Stepper__MF_not_enable_Pin|SPI2_NSS__CK_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, LED_GREEN_Pin|GPIO_PIN_13|LED_ORANGE_Pin|LED_BLUE_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pins : Stepper_limit_sw__inside_Pin Stepper_limit_sw__outside_Pin */
-  GPIO_InitStruct.Pin = Stepper_limit_sw__inside_Pin|Stepper_limit_sw__outside_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+  HAL_GPIO_WritePin(GPIOD, LED_GREEN_Pin|LED_RED_Pin|LED_ORANGE_Pin|LED_BLUE_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : Beeper_Drive_Pin */
   GPIO_InitStruct.Pin = Beeper_Drive_Pin;
@@ -1103,6 +1137,24 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(Stepper__MF_not_enable_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : StepLiimitSw_inside_NO_Pin StepLimitSw_inside_NC_Pin StepLimitSw_outside_NO_Pin */
+  GPIO_InitStruct.Pin = StepLiimitSw_inside_NO_Pin|StepLimitSw_inside_NC_Pin|StepLimitSw_outside_NO_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : StepLimitSw_outside_NC_Pin */
+  GPIO_InitStruct.Pin = StepLimitSw_outside_NC_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(StepLimitSw_outside_NC_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : StepLimitSw_index_NO_Pin StepLimitSw_index_NC_Pin */
+  GPIO_InitStruct.Pin = StepLimitSw_index_NO_Pin|StepLimitSw_index_NC_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
   /*Configure GPIO pin : SPI2_NSS__CK_Pin */
   GPIO_InitStruct.Pin = SPI2_NSS__CK_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -1110,17 +1162,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
   HAL_GPIO_Init(SPI2_NSS__CK_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LED_GREEN_Pin PD13 LED_ORANGE_Pin LED_BLUE_Pin */
-  GPIO_InitStruct.Pin = LED_GREEN_Pin|GPIO_PIN_13|LED_ORANGE_Pin|LED_BLUE_Pin;
+  /*Configure GPIO pins : LED_GREEN_Pin LED_RED_Pin LED_ORANGE_Pin LED_BLUE_Pin */
+  GPIO_InitStruct.Pin = LED_GREEN_Pin|LED_RED_Pin|LED_ORANGE_Pin|LED_BLUE_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 11, 0);
-  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
-
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 11, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
@@ -1165,8 +1214,6 @@ static void lcdi2cmsgM1c(union LCDSETVAR u){
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void const * argument)
 {
-  /* init code for USB_DEVICE */
-  MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 5 */
 
 osDelay(0); // Debugging HardFault
@@ -1615,7 +1662,7 @@ void CallbackdefaultTaskTimer(void const * argument)
 
  /**
   * @brief  Period elapsed callback in non blocking mode
-  * @note   This function is called  when TIM5 interrupt took place, inside
+  * @note   This function is called  when TIM12 interrupt took place, inside
   * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
   * a global variable "uwTick" used as application time base.
   * @param  htim : TIM handle
@@ -1626,7 +1673,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 0 */
 
   /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM5) {
+  if (htim->Instance == TIM12) {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
