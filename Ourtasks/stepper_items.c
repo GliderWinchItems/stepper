@@ -13,7 +13,7 @@ Control lines: Output pin drives FET gate, open drain to controller opto-isolato
 PE5  - TIM9CH1 Stepper Pulse: PU (TIM1 Break shared interrupt vector)
    Interrupt vector: TIM1_BRK_TIM9_IRQHandler
 PB0  - Direction: DR 
-PB1  - Enable: EN  
+PB1  - Enable: EN  - High = enable (drive FET ON)
 
 Limit switches: resistor pullup to +5v. Contact closes to gnd
    Interrupt vector: EXTI15_10_IRQHandler (common to PE10-PE15)
@@ -72,7 +72,7 @@ static TIM_HandleTypeDef *ptim3;
  * *************************************************************************/
 void stepper_idx_v_struct_hardcode_params(void)
 {
-        stepperstuff.clfactor = 655.35f; // 100% gives max speed
+        stepperstuff.clfactor = 1000.0f; // 100% gives max speed
         stepperstuff.ledctr   = 0;
         stepperstuff.accumpos = 0; // Position accumulator
         return;
@@ -128,7 +128,7 @@ void stepper_items_clupdate(uint8_t dr)
 
 
 /*#######################################################################################
- * ISR routine for TIM9
+ * ISR routine for TIM9 [Normally no interrupt; interrupt for test purposes]
  *####################################################################################### */
 uint32_t LEDx;
 void stepper_items_IRQHandler(TIM_HandleTypeDef *phtim)
@@ -170,7 +170,9 @@ void stepper_items_TIM3_IRQHandler(void)
 		// Start TIM9 to generated a delayed pulse.
 		pT9base->CR1 = 0x9; 
 
-HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_0);
+HAL_GPIO_TogglePin(GPIOA,GPIO_PIN_5); // 'O-scope trigger'
+
+// Visual check
 stepperstuff.ledctr += 1;
 if (stepperstuff.ledctr > 1000)
 {

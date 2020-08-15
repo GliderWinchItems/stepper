@@ -1259,6 +1259,8 @@ static void lcdi2cmsgM1c(union LCDSETVAR u){
   if ((lcdcontext & LCDX_CNTR) == 0) // Skip if Contactor is in Fault: do not overwrite Contactor error msg
   lcdi2cprintf(&punitd4x20,DMOCSPDTQ, 0,"S%6i   T%6.1f  ",u.u32two[0],u.ftwo[1]);}
   #endif
+static struct LCDMSGSET lcdi2cfunc5;
+static void lcdi2cmsgMstep(union LCDSETVAR u){lcdi2cprintf(&punitd4x20,DMOCSPDTQ, 0,"SPS%6i RPM %6.1f  ",u.u32two[0],u.ftwo[1]);}
 
 // LCD UART msg
 //struct SERIALSENDTASKBCB* pbuflcd;
@@ -1327,7 +1329,10 @@ osDelay(0); // Debugging HardFault
   lcdi2cfunc1.ptr = lcdi2cmsgm1;
 
   if (LcdmsgsetTaskQHandle == NULL) morse_trap(2323);
-    xQueueSendToBack(LcdmsgsetTaskQHandle, &lcdi2cfunc1, 0);       
+    xQueueSendToBack(LcdmsgsetTaskQHandle, &lcdi2cfunc1, 0);  
+
+  // STEPPERSHOW     
+  lcdi2cfunc5.ptr = lcdi2cmsgMstep;
 
   // Get buffers and partially initialize for later use.
 #ifdef TWOCALLSWITHONEARGUMENT  
@@ -1452,6 +1457,7 @@ uint8_t ratepace = 0;
 			{
 //HAL_GPIO_TogglePin(GPIOD, LED_GREEN_Pin); // GREEN
 
+#ifndef STEPPERSHOW
 #ifdef TWOCALLSWITHONEARGUMENT 
         // LCD I2C: two values requires two calls
         lcdi2cfunc2.u.u32 = dmocctl[DMOC_SPEED].speedact; // Value that is passed to function 
@@ -1467,14 +1473,21 @@ uint8_t ratepace = 0;
         if (LcdmsgsetTaskQHandle != NULL)
             xQueueSendToBack(LcdmsgsetTaskQHandle, &lcdi2cfunc4, 0);
 
-#endif          
+#endif  
+#endif        
 			}
 
 			/* LCD output from queue pointers. */
 			lcdmsg_poll();
 
 #ifdef STEPPERSHOW
-    yprintf(&pbuf4,"\n\r%10u RPM%0.3f",stepperstuff.speedcmdi,stepperstuff.speedcmdf*((((100000/2000)*60)/65536.0))  );
+      lcdi2cfunc5.u.ftwo[1] = stepperstuff.speedcmdf*((((100000/2000)*0.0006)));
+      lcdi2cfunc5.u.u32two[0] = stepperstuff.speedcmdi;
+
+    yprintf(&pbuf4,"\n\r%10u RPM%0.3f",stepperstuff.speedcmdi,lcdi2cfunc5.u.ftwo[1]);
+    if (LcdmsgsetTaskQHandle != NULL)
+       xQueueSendToBack(LcdmsgsetTaskQHandle, &lcdi2cfunc5, 0);
+
 
 #endif      
     }

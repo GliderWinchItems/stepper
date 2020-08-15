@@ -484,23 +484,20 @@ void GevcuStates_GEVCU_ARM(void)
 	}
 	#endif
 
-	/* Use PREP switch to reverse direction. */
-	if (gevcufunction.psw[PSW_PB_PREP]->db_on == SW_CLOSED)
-	{
-		led_prep.mode = LED_ON; // PREP state led on
-		xQueueSendToBack(LEDTaskQHandle,&led_prep,portMAX_DELAY);
-
+	if (gevcufunction.psw[PSW_ZODOMTR]->db_on == SW_CLOSED)
+	{ 
+		led_retrieve.mode = LED_ON;
+		xQueueSendToBack(LEDTaskQHandle,&led_retrieve,portMAX_DELAY);
 		stepper_items_clupdate(0);
+		HAL_GPIO_WritePin(Stepper__DR__direction_GPIO_Port,Stepper__DR__direction_Pin,GPIO_PIN_SET);
 	}
 	else
 	{
-		led_prep.mode = LED_OFF; // PREP state led on
-		xQueueSendToBack(LEDTaskQHandle,&led_prep,portMAX_DELAY);
-
+		led_retrieve.mode = LED_OFF;
+		xQueueSendToBack(LEDTaskQHandle,&led_retrieve,portMAX_DELAY);
+		HAL_GPIO_WritePin(Stepper__DR__direction_GPIO_Port,Stepper__DR__direction_Pin,GPIO_PIN_RESET);
 		stepper_items_clupdate(1);
-	}		
-
-
+	}
 
 	/* Compute torque request when the GevcuEvents_04 handling of the
       timer notification called dmoc_control_time, and dmoc_control_time
