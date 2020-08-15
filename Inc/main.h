@@ -90,17 +90,18 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define Stepper_limit_sw__inside_Pin GPIO_PIN_5
-#define Stepper_limit_sw__inside_GPIO_Port GPIOE
-#define Stepper_limit_sw__inside_EXTI_IRQn EXTI9_5_IRQn
+#define T9C1steppulse_Pin GPIO_PIN_5
+#define T9C1steppulse_GPIO_Port GPIOE
 #define Beeper_Drive_Pin GPIO_PIN_6
 #define Beeper_Drive_GPIO_Port GPIOE
 #define Control_lever_Pin GPIO_PIN_1
 #define Control_lever_GPIO_Port GPIOC
 #define Supply_12v_Pin GPIO_PIN_2
 #define Supply_12v_GPIO_Port GPIOC
-#define StepperPulse_Pin GPIO_PIN_1
-#define StepperPulse_GPIO_Port GPIOA
+#define DrumencodeA_Pin GPIO_PIN_0
+#define DrumencodeA_GPIO_Port GPIOA
+#define DrumencodeB_Pin GPIO_PIN_1
+#define DrumencodeB_GPIO_Port GPIOA
 #define Supply_5v_Pin GPIO_PIN_4
 #define Supply_5v_GPIO_Port GPIOC
 #define Spare_Pin GPIO_PIN_5
@@ -109,15 +110,32 @@ void Error_Handler(void);
 #define Stepper__DR__direction_GPIO_Port GPIOB
 #define Stepper__MF_not_enable_Pin GPIO_PIN_1
 #define Stepper__MF_not_enable_GPIO_Port GPIOB
-#define Stepper_limit_sw__outside_Pin GPIO_PIN_10
-#define Stepper_limit_sw__outside_GPIO_Port GPIOE
-#define Stepper_limit_sw__outside_EXTI_IRQn EXTI15_10_IRQn
+#define LimitSw_inside_NO_Pin GPIO_PIN_10
+#define LimitSw_inside_NO_GPIO_Port GPIOE
+#define LimitSw_inside_NO_EXTI_IRQn EXTI15_10_IRQn
+#define LimitSw_inside_NC_Pin GPIO_PIN_11
+#define LimitSw_inside_NC_GPIO_Port GPIOE
+#define LimitSw_inside_NC_EXTI_IRQn EXTI15_10_IRQn
+#define LimitSw_outside_NO_Pin GPIO_PIN_12
+#define LimitSw_outside_NO_GPIO_Port GPIOE
+#define LimitSw_outside_NO_EXTI_IRQn EXTI15_10_IRQn
+#define LimitSw_outside_NC_Pin GPIO_PIN_13
+#define LimitSw_outside_NC_GPIO_Port GPIOE
+#define LimitSw_outside_NC_EXTI_IRQn EXTI15_10_IRQn
+#define LimitSw_index_NO_Pin GPIO_PIN_14
+#define LimitSw_index_NO_GPIO_Port GPIOE
+#define LimitSw_index_NO_EXTI_IRQn EXTI15_10_IRQn
+#define LimitSw_index_NC_Pin GPIO_PIN_15
+#define LimitSw_index_NC_GPIO_Port GPIOE
+#define LimitSw_index_NC_EXTI_IRQn EXTI15_10_IRQn
 #define SPI2_NSS__CK_Pin GPIO_PIN_12
 #define SPI2_NSS__CK_GPIO_Port GPIOB
 #define LED_GREEN_Pin GPIO_PIN_12
 #define LED_GREEN_GPIO_Port GPIOD
-#define LED_ORANGE_Pin GPIO_PIN_14
+#define LED_ORANGE_Pin GPIO_PIN_13
 #define LED_ORANGE_GPIO_Port GPIOD
+#define LED_RED_Pin GPIO_PIN_14
+#define LED_RED_GPIO_Port GPIOD
 #define LED_BLUE_Pin GPIO_PIN_15
 #define LED_BLUE_GPIO_Port GPIOD
 #define Beeper_Pin GPIO_PIN_8
@@ -134,9 +152,9 @@ extern UART_HandleTypeDef huart3;
 extern UART_HandleTypeDef huart6;
 
 // Gateway task (for Mailbox use)
-#define GATEWAYTASKINCLUDED // Include gateway
+//#define GATEWAYTASKINCLUDED // Include gateway
 
-#define USEUSBFORCANMSGS // Use USB for gateway to PC
+//#define USEUSBFORCANMSGS // Use USB for gateway to PC
 
 //#define CONFIGCAN2	// Configure for CAN2
 

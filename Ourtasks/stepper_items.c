@@ -6,6 +6,28 @@
 /*
 
 update100K
+
+08/10/2020 - pins added to Control Panel for stepper testing
+
+Control lines: Output pin drives FET gate, open drain to controller opto-isolator
+PE5  - TIM9CH1 Stepper Pulse: PU (TIM1 Break shared interrupt vector)
+   Interrupt vector: TIM1_BRK_TIM9_IRQHandler
+PB0  - Direction: DR 
+PB1  - Enable: EN  
+
+Limit switches: resistor pullup to +5v. Contact closes to gnd
+   Interrupt vector: EXTI15_10_IRQHandler (common to PE10-PE15)
+PE10 - EXTI10 Inside  Limit switch: NO contacts (switch connects to gnd)
+PE11 - EXTI11 Inside  Limit switch: NC contacts (switch connects to gnd)
+PE12 - EXTI12 Outside Limit switch: NO contacts (switch connects to gnd)
+PE13 - EXTI13 Outside Limit switch: NC contacts (switch connects to gnd)
+PE14 - EXTI14 Index   Limit switch: NO contacts (switch connects to gnd)
+PE15 - EXTI15 Index   Limit switch: NC contacts (switch connects to gnd)
+
+Drum encoder: TIM2CH1. Pullup resistors
+PA0 - Encoder channel A
+PA1 - Encoder channel B
+
 */
 #include <stdint.h>
 #include <stdarg.h>
@@ -24,71 +46,66 @@ update100K
 #include "stepper_items.h"
 #include "calib_control_lever.h"
 
-#define TIM2CNTRATE 84000000   // TIM2 counter rate (Hz)
+#define TIM3CNTRATE 84000000   // TIM3 counter rate (Hz)
 #define UPDATERATE 100000      // 100KHz interrupt/update rate
-#define PULSEWIDTHCNT (TIM2CNTRATE/50000) // 5 us 
+#define TIM3DUR  (TIM3CNTRATE/UPDATERATE) // 1680 counts per interrupt
+
+#define TIM9CNTRATE 168000000 // TIM9 counter rate (Hz)
+#define TIM9PWMCYCLE (168*10)   // 10us pwm cycle
+#define TIM9PULSEDELAY (TIM9PWMCYCLE - (168*3))
+
+
+TIM_TypeDef  *pT3base; // Register base address 
+TIM_TypeDef  *pT9base; // Register base address 
+
 
 /* Struct with all you want to know. */
 struct STEPPERSTUFF stepperstuff;
 
-TIM_HandleTypeDef *ptimlocal;
-
-//uint32_t stepper_pu1_inc = ((168*1000000)/1);
+static TIM_HandleTypeDef *ptim9;
+static TIM_HandleTypeDef *ptim3;
 
 /* *************************************************************************
  * void stepper_idx_v_struct_hardcode_params(void);
  * 
- * @brief	: Initialization
+ * @brief       : Initialization
  * *************************************************************************/
 void stepper_idx_v_struct_hardcode_params(void)
 {
-	/*
-	clfactor: 
-	APB1 (TIM2) runs at 42 MHz, so TIM2 max speed counts at 84 MHz. If the
-	max stepper rate is 40 KHz, that is 25 us per step. Since the output pin
-	toggles upon each output catpure, the duration between oc interrupts is
-	1/2, or 12.5 us. At 84 MHz 12.5 us is a count of 1050.
-
-	Since the CL position is 0.0 - 100.0, at a CL setting of 100.0 the factor
-	is (1050 * 100). 
-	*/
-
-	stepperstuff.clfactor = (1E-7); //(1.0/(1050*100));
-	stepperstuff.zerohold = 0;
-	stepperstuff.ocinc    = 42000000;//0x7FFFFFFF-101; // 50 sec per step (almost zero)
-	stepperstuff.ocnxt    = 42000000;//0x7FFFFFFF-101; // 50 sec per step (almost zero)
-	stepperstuff.ocupd   = (TIM2CNTRATE/UPDATERATE); // Number of timer ticks for update
-
-	return;
+        stepperstuff.clfactor = 655.35f; // 100% gives max speed
+        stepperstuff.ledctr   = 0;
+        stepperstuff.accumpos = 0; // Position accumulator
+        return;
 }
 
 /* *************************************************************************
- * void stepper_items_init(TIM_HandleTypeDef *phtim2);
- * phtim2 = pointer to timer handle
+ * void stepper_items_init(TIM_HandleTypeDef *phtim);
+ * phtim = pointer to timer handle
  * @brief	: Initialization of channel increment
  * *************************************************************************/
-void stepper_items_init(TIM_HandleTypeDef *phtim2)
+void stepper_items_init(TIM_HandleTypeDef *phtim)
 {
-	/* Save locally for faster calling. */
-	ptimlocal = phtim2;
-
-	/* Initialize parameters. */
 	stepper_idx_v_struct_hardcode_params();
 
-	/* Channel 2 - PU (Stepper pulse line). */
-	phtim2->Instance->CCR2 = phtim2->Instance->CNT + stepperstuff.ocupd; //
-//	HAL_TIM_OC_Start_IT(phtim2, TIM_CHANNEL_2);
-	phtim2->Instance->DIER   = (1<<2); // Enable OC interrupt CH2
-	phtim2->Instance->EGR   |= (1<<2); // Generate Event for OC CH2
-	phtim2->Instance->CCMR1  = (0X3 << 12); // Toggle OC2
-	phtim2->Instance->CCMR1  = 
+	ptim9 = phtim; // Save locally for faster calling.
+	pT9base = ptim9->Instance;
 
-	/* Channel 1 - Internal update. (No output pin). */
-//	phtim2->Instance->CCR1 = phtim2->Instance->CNT + stepperstuff.oc1inc; // Update channel
-//	HAL_TIM_OC_Start_IT(phtim2, TIM_CHANNEL_1);
+	pT9base->DIER = 0;// None //0x2; // CH1 interrupt enable
+	pT9base->CCR1 = TIM9PULSEDELAY; // Delay count
+	pT9base->ARR  = (TIM9PWMCYCLE - 1); // (10 us)
+	pT9base->CCER = 0x1; // OC active high; signal on pin
 
-	//HAL_TIM_Base_Start_IT(phtim2);
-	phtim2->Instance->CR1 |= 1;
+	/* TIM3CH1 100 KHz interrupts. */
+	
+	extern TIM_HandleTypeDef htim3;
+	ptim3 = &htim3;
+	pT3base = ptim3->Instance;
+
+	ptim3->Instance->DIER = 0x2; // CH1 interrupt enable, only.
+	ptim3->Instance->CCR1 = ptim3->Instance->CNT + TIM3DUR;
+
+	/* Start TIM3 counter. */
+	ptim3->Instance->CR1 |= 1;
 
 	return;
 }
@@ -99,54 +116,70 @@ void stepper_items_init(TIM_HandleTypeDef *phtim2)
  * *************************************************************************/
 void stepper_items_clupdate(uint8_t dr)
 {
-	int32_t  ntmp;
-	uint32_t itmp;
-
 	stepperstuff.speedcmdf = clfunc.curpos * stepperstuff.clfactor;
-	if (clfunc.curpos > 0)
-	{
-		stepperstuff.ocnxt = 1.0/stepperstuff.speedcmdf;
-	}
+	stepperstuff.speedcmdi = stepperstuff.speedcmdf;
+	if (stepperstuff.speedcmdi > 65535)
+		stepperstuff.speedinc = 65535;
 	else
-	{
-		stepperstuff.ocnxt = 84000000;//0x7FFFFFFF; // 50 sec per step (almost zero)
-	}
-
-	/* Are we increasing speed: reducing timer duration. */
-	ntmp = (stepperstuff.ocnxt - stepperstuff.ocinc);
-	if (ntmp < -1000)
-	{
-		itmp = ptimlocal->Instance->CCR2 - ptimlocal->Instance->CNT;
-		if (itmp > 1000)
-		{
-			ptimlocal->Instance->CCR2 = ptimlocal->Instance->CNT + stepperstuff.ocnxt;
-		}
-
-	}
-
-	stepperstuff.ocinc = stepperstuff.ocnxt;
+		stepperstuff.speedinc = stepperstuff.speedcmdi;
 
 	return;
 }
 
 
 /*#######################################################################################
- * ISR routine for TIM2
+ * ISR routine for TIM9
  *####################################################################################### */
-void stepper_items_IRQHandler(TIM_HandleTypeDef *phtim2)
+uint32_t LEDx;
+void stepper_items_IRQHandler(TIM_HandleTypeDef *phtim)
 {
 	__attribute__((__unused__))int temp;
 	int32_t tmp;
 
-	/* Next Channel 2 iinterrupt. */
-	phtim2->Instance->SR = ~(0x1F);	// Reset CH2 flag
+	pT9base->SR = ~(0x1F);	// Reset CH1 flag (and all flags)
 
-	/* Increment OC CH2 for next interrupt. */
-	phtim2->Instance->CCR2 += stepperstuff.ocinc;
+//phtim->Instance->CCR1 = ptim9->Instance->CNT + 504;
+//morse_trap(574);
 
-HAL_GPIO_TogglePin(GPIOD, LED_GREEN_Pin);
-
-
-	temp = phtim2->Instance->SR;	// Avoid any tail-chaining
+LEDx += 1;
+if (LEDx > 1000)
+{
+  LEDx = 0;
+  HAL_GPIO_TogglePin(GPIOD, LED_ORANGE_Pin);
+}
+	temp = phtim->Instance->SR;	// Avoid any tail-chaining
 	return;
+}
+/*#######################################################################################
+ * ISR routine for TIM3
+ *####################################################################################### */
+void stepper_items_TIM3_IRQHandler(void)
+{
+//	__attribute__((__unused__))int temp;
+//	int32_t temp;
+
+	pT3base->SR = ~(0x2);	// Reset CH1 flag
+
+	pT3base->CCR1 += TIM3DUR; // Schedule next interrupt
+
+	stepperstuff.accumpos += stepperstuff.speedinc;
+	if ((stepperstuff.accumpos >> 16) != (stepperstuff.accumpos_prev))
+	{
+		// Update old position with new
+		stepperstuff.accumpos_prev = (stepperstuff.accumpos >> 16);	
+		// Start TIM9 to generated a delayed pulse.
+		pT9base->CR1 = 0x9; 
+
+HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_0);
+stepperstuff.ledctr += 1;
+if (stepperstuff.ledctr > 1000)
+{
+  stepperstuff.ledctr = 0;
+  HAL_GPIO_TogglePin(GPIOD, LED_GREEN_Pin);
+}
+	}
+
+//	temp = pT3base->SR;	// Avoid any tail-chaining
+	return;
+
 }

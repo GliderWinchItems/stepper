@@ -181,8 +181,8 @@ void StartGevcuTask(void const * argument)
 
 
 	/* Start stepper pulse (PU signal) timer. */
-extern TIM_HandleTypeDef htim2;
-	stepper_items_init(&htim2);
+extern TIM_HandleTypeDef htim9;
+	stepper_items_init(&htim9);
 //HAL_GPIO_TogglePin(GPIOD, LED_GREEN_Pin);
 
   /* Infinite loop */
