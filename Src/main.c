@@ -779,7 +779,7 @@ static void MX_TIM1_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 15700;
+  sConfigOC.Pulse = 35001;//15700;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -1247,7 +1247,7 @@ static struct LCDMSGSET lcdi2cfunc3;
 static struct LCDMSGSET lcdi2cfunc4;
   #endif
 //                                                                       "12345678901234567890"
-static void lcdi2cmsgm1 (union LCDSETVAR u){lcdi2cputs  (&punitd4x20,0,0,"stepINV  20200815 02");}
+static void lcdi2cmsgm1 (union LCDSETVAR u){lcdi2cputs  (&punitd4x20,0,0,"stepINV  20200816 04");}
   #ifdef TWOCALLSWITHONEARGUMENT  
 static void lcdi2cmsgM1a(union LCDSETVAR u){lcdi2cprintf(&punitd4x20,DMOCSPDTQ, 0,"S%6i  ",   u.u32);}
 static void lcdi2cmsgM1b(union LCDSETVAR u){lcdi2cprintf(&punitd4x20,DMOCSPDTQ, 9,"T%6.1f  ",u.f);}
@@ -1257,7 +1257,7 @@ static void lcdi2cmsgM1c(union LCDSETVAR u){
   lcdi2cprintf(&punitd4x20,DMOCSPDTQ, 0,"S%6i   T%6.1f  ",u.u32two[0],u.ftwo[1]);}
   #endif
 static struct LCDMSGSET lcdi2cfunc5;
-static void lcdi2cmsgMstep(union LCDSETVAR u){lcdi2cprintf(&punitd4x20,DMOCSPDTQ, 0,"SPS%6i RPM %6.1f  ",u.u32two[0],u.ftwo[1]);}
+static void lcdi2cmsgMstep(union LCDSETVAR u){lcdi2cprintf(&punitd4x20,DMOCSPDTQ, 0,"INC%6i RPM %6.1f  ",u.u32two[0],u.ftwo[1]);}
 
 
 // LCD UART msg
@@ -1479,12 +1479,12 @@ uint8_t ratepace = 0;
 
 #ifdef STEPPERSHOW
      lcdi2cfunc5.u.ftwo[1] = stepperstuff.speedcmdf*(84000*30);
-     if (stepperstuff.ocinc > 99999 )
-      lcdi2cfunc5.u.u32two[0] = 99999;
+     if (stepperstuff.ocinc > 999999 )
+      lcdi2cfunc5.u.u32two[0] = 999999;
      else      
       lcdi2cfunc5.u.u32two[0] = stepperstuff.ocinc;
 
-    yprintf(&pbuf4,"\n\r%10u RPM 0.3f",stepperstuff.ocinc,lcdi2cfunc5.u.ftwo[1]);
+    yprintf(&pbuf4,"\n\rINC%10u| RPM %7.1f",stepperstuff.ocinc,lcdi2cfunc5.u.ftwo[1]);
     if (LcdmsgsetTaskQHandle != NULL)
        xQueueSendToBack(LcdmsgsetTaskQHandle, &lcdi2cfunc5, 0);
 
