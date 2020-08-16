@@ -28,14 +28,15 @@
 
 struct STEPPERSTUFF
 {
-	int64_t  position;	// Step count of position
-	float	 clfactor;	// Constant to compute oc duration at CL = 100.0
-	float    speedcmdf;
+	int64_t  position;	 // Step count of position
+	float	 clfactor;	 // Constant to compute oc duration at CL = 100.0
+	float    speedcmdf;  // Speed command (float)
 	uint32_t ledctr;     // Counter for throttling green LED
-	uint32_t speedcmdi;	// Commanded speed (signed)
-	int32_t accumpos;  // Position accumulator in upper 16b
-	uint16_t speedinc;  // Low 16b of position accumulator
-	int16_t accumpos_prev; // Previous accumpos (hi-ord 16b)
+	uint32_t speedcmdi;	 // Commanded speed (integer)
+	int32_t  accumpos;   // Position accumulator in upper 16b
+	uint16_t speedinc;   // Low 16b of position accumulator
+	int16_t  accumpos_prev; // Previous accumpos (hi-ord 16b)
+	uint32_t drflag;     // BSRR pin set/reset bit position
 };
 
 /* *************************************************************************/

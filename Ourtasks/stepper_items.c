@@ -116,6 +116,8 @@ void stepper_items_init(TIM_HandleTypeDef *phtim)
  * *************************************************************************/
 void stepper_items_clupdate(uint8_t dr)
 {
+	stepperstuff.drflag = (Stepper__DR__direction_Pin << (dr*16)); // Save pushbutton state for direction control
+
 	stepperstuff.speedcmdf = clfunc.curpos * stepperstuff.clfactor;
 	stepperstuff.speedcmdi = stepperstuff.speedcmdf;
 	if (stepperstuff.speedcmdi > 65535)
@@ -167,8 +169,13 @@ void stepper_items_TIM3_IRQHandler(void)
 	{
 		// Update old position with new
 		stepperstuff.accumpos_prev = (stepperstuff.accumpos >> 16);	
+
+		// Set direction pin
+		Stepper__DR__direction_GPIO_Port->BSRR = stepperstuff.drflag;
+
 		// Start TIM9 to generated a delayed pulse.
 		pT9base->CR1 = 0x9; 
+
 
 HAL_GPIO_TogglePin(GPIOA,GPIO_PIN_5); // 'O-scope trigger'
 

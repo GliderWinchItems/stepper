@@ -1483,8 +1483,8 @@ uint8_t ratepace = 0;
 #ifdef STEPPERSHOW
       lcdi2cfunc5.u.ftwo[1] = stepperstuff.speedcmdf*((((100000/2000)*0.0006)));
       lcdi2cfunc5.u.u32two[0] = stepperstuff.speedcmdi;
-
-    yprintf(&pbuf4,"\n\r%10u RPM%0.3f",stepperstuff.speedcmdi,lcdi2cfunc5.u.ftwo[1]);
+uint16_t pbpin = GPIOB->ODR;
+    yprintf(&pbuf4,"\n\rINC%6u| RPM %6.1f| PB %04x",stepperstuff.speedcmdi,lcdi2cfunc5.u.ftwo[1],pbpin);//stepperstuff.drflag);
     if (LcdmsgsetTaskQHandle != NULL)
        xQueueSendToBack(LcdmsgsetTaskQHandle, &lcdi2cfunc5, 0);
 
