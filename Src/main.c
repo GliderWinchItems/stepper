@@ -167,6 +167,7 @@ SPI_HandleTypeDef hspi2;
 
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim9;
 
 UART_HandleTypeDef huart2;
@@ -202,6 +203,7 @@ static void MX_I2C1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM9_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
+static void MX_TIM5_Init(void);
 void StartDefaultTask(void const * argument);
 void CallbackdefaultTaskTimer(void const * argument);
 
@@ -288,6 +290,7 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM9_Init();
   MX_USB_OTG_FS_PCD_Init();
+  MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
 
 /*
@@ -854,6 +857,64 @@ static void MX_TIM2_Init(void)
 }
 
 /**
+  * @brief TIM5 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM5_Init(void)
+{
+
+  /* USER CODE BEGIN TIM5_Init 0 */
+
+  /* USER CODE END TIM5_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM5_Init 1 */
+
+  /* USER CODE END TIM5_Init 1 */
+  htim5.Instance = TIM5;
+  htim5.Init.Prescaler = 0;
+  htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim5.Init.Period = 0;
+  htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim5) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim5, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_OC_Init(&htim5) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim5, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_TIMING;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_OC_ConfigChannel(&htim5, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM5_Init 2 */
+
+  /* USER CODE END TIM5_Init 2 */
+
+}
+
+/**
   * @brief TIM9 Initialization Function
   * @param None
   * @retval None
@@ -874,7 +935,7 @@ static void MX_TIM9_Init(void)
   htim9.Instance = TIM9;
   htim9.Init.Prescaler = 0;
   htim9.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim9.Init.Period = 0;
+  htim9.Init.Period = 0xffff;
   htim9.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim9.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim9) != HAL_OK)
@@ -1186,7 +1247,7 @@ static struct LCDMSGSET lcdi2cfunc3;
 static struct LCDMSGSET lcdi2cfunc4;
   #endif
 //                                                                       "12345678901234567890"
-static void lcdi2cmsgm1 (union LCDSETVAR u){lcdi2cputs  (&punitd4x20,0,0,"stepper  20200730 01");}
+static void lcdi2cmsgm1 (union LCDSETVAR u){lcdi2cputs  (&punitd4x20,0,0,"stepINV  20200815 02");}
   #ifdef TWOCALLSWITHONEARGUMENT  
 static void lcdi2cmsgM1a(union LCDSETVAR u){lcdi2cprintf(&punitd4x20,DMOCSPDTQ, 0,"S%6i  ",   u.u32);}
 static void lcdi2cmsgM1b(union LCDSETVAR u){lcdi2cprintf(&punitd4x20,DMOCSPDTQ, 9,"T%6.1f  ",u.f);}
@@ -1195,6 +1256,9 @@ static void lcdi2cmsgM1c(union LCDSETVAR u){
   if ((lcdcontext & LCDX_CNTR) == 0) // Skip if Contactor is in Fault: do not overwrite Contactor error msg
   lcdi2cprintf(&punitd4x20,DMOCSPDTQ, 0,"S%6i   T%6.1f  ",u.u32two[0],u.ftwo[1]);}
   #endif
+static struct LCDMSGSET lcdi2cfunc5;
+static void lcdi2cmsgMstep(union LCDSETVAR u){lcdi2cprintf(&punitd4x20,DMOCSPDTQ, 0,"SPS%6i RPM %6.1f  ",u.u32two[0],u.ftwo[1]);}
+
 
 // LCD UART msg
 //struct SERIALSENDTASKBCB* pbuflcd;
@@ -1264,6 +1328,9 @@ osDelay(0); // Debugging HardFault
 
   if (LcdmsgsetTaskQHandle == NULL) morse_trap(2323);
     xQueueSendToBack(LcdmsgsetTaskQHandle, &lcdi2cfunc1, 0);       
+
+// STEPPERSHOW     
+  lcdi2cfunc5.ptr = lcdi2cmsgMstep;
 
   // Get buffers and partially initialize for later use.
 #ifdef TWOCALLSWITHONEARGUMENT  
@@ -1387,7 +1454,7 @@ uint8_t ratepace = 0;
 			if (flag_clcalibed != 0)
 			{
 //HAL_GPIO_TogglePin(GPIOD, LED_GREEN_Pin); // GREEN
-
+#ifndef STEPPERSHOW
 #ifdef TWOCALLSWITHONEARGUMENT 
         // LCD I2C: two values requires two calls
         lcdi2cfunc2.u.u32 = dmocctl[DMOC_SPEED].speedact; // Value that is passed to function 
@@ -1404,13 +1471,23 @@ uint8_t ratepace = 0;
             xQueueSendToBack(LcdmsgsetTaskQHandle, &lcdi2cfunc4, 0);
 
 #endif          
+#endif          
 			}
 
 			/* LCD output from queue pointers. */
 			lcdmsg_poll();
 
 #ifdef STEPPERSHOW
-    yprintf(&pbuf4,"\n\r%10u %0.9f",stepperstuff.ocinc,stepperstuff.speedcmdf);
+     lcdi2cfunc5.u.ftwo[1] = stepperstuff.speedcmdf*(84000*30);
+     if (stepperstuff.ocinc > 99999 )
+      lcdi2cfunc5.u.u32two[0] = 99999;
+     else      
+      lcdi2cfunc5.u.u32two[0] = stepperstuff.ocinc;
+
+    yprintf(&pbuf4,"\n\r%10u RPM 0.3f",stepperstuff.ocinc,lcdi2cfunc5.u.ftwo[1]);
+    if (LcdmsgsetTaskQHandle != NULL)
+       xQueueSendToBack(LcdmsgsetTaskQHandle, &lcdi2cfunc5, 0);
+
 
 #endif      
     }

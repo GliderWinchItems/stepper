@@ -44,12 +44,21 @@ PE15 - EXTI15 Index   Limit switch: NC contacts (switch connects to gnd)
 
 #define TIM2CNTRATE 84000000   // TIM2 counter rate (Hz)
 #define UPDATERATE 100000      // 100KHz interrupt/update rate
-#define PULSEWIDTHCNT (TIM2CNTRATE/50000) // 5 us 
+
+#define TIM3CNTRATE 84000000   // TIM3 counter rate (Hz)
+#define UPDATERATE 100000      // 100KHz interrupt/update rate
+#define TIM3DUR  (TIM3CNTRATE/UPDATERATE) // 1680 counts per interrupt
+
+#define TIM9CNTRATE 168000000 // TIM9 counter rate (Hz)
+
+
+TIM_TypeDef  *pT9base; // Register base address 
+TIM_HandleTypeDef *ptimlocal;
 
 /* Struct with all you want to know. */
 struct STEPPERSTUFF stepperstuff;
 
-TIM_HandleTypeDef *ptimlocal;
+static TIM_HandleTypeDef *ptim9;
 
 //uint32_t stepper_pu1_inc = ((168*1000000)/1);
 
@@ -62,16 +71,17 @@ void stepper_idx_v_struct_hardcode_params(void)
 {
 	/*
 	clfactor: 
-	APB1 (TIM2) runs at 42 MHz, so TIM2 max speed counts at 84 MHz. If the
-	max stepper rate is 40 KHz, that is 25 us per step. Since the output pin
-	toggles upon each output catpure, the duration between oc interrupts is
-	1/2, or 12.5 us. At 84 MHz 12.5 us is a count of 1050.
+	APB2 (TIM9) runs at 84 MHz so it counts at 168 MHz. If max stepper speed is 
+	3000 rpm (50 rps) and there are 2000 microsteps per rev, the output pulse
+	rate is 100,000 per sec. Since the output pin is toggled the interrupt
+	rate would be 200,000 per sec, or 5 us between interrupts.  At 168 counts
+	per microsecond the OC increment would be 840. Since the CL position is
+	range is 0 - 100.0, that at max speed, the OC increment would be
+	1.0/(840000 * CLposition)
 
-	Since the CL position is 0.0 - 100.0, at a CL setting of 100.0 the factor
-	is (1050 * 100). 
 	*/
 
-	stepperstuff.clfactor = (1E-6); //(1.0/(1050*100));
+	stepperstuff.clfactor = (1.0/84000.0); 
 	stepperstuff.zerohold = 0;
 	stepperstuff.ocinc    = 42000000;//0x7FFFFFFF-101; // 50 sec per step (almost zero)
 	stepperstuff.ocnxt    = 42000000;//0x7FFFFFFF-101; // 50 sec per step (almost zero)
@@ -103,6 +113,9 @@ void stepper_items_init(TIM_HandleTypeDef *phtim)
 	phtim->Instance->CCMR1  = (0X3 << 4); // Toggle OC1
 	phtim->Instance->CCER   = 1;	      // CH1 pin active output
 	phtim->Instance->ARR    = 0xffff;     // Auto-reload reg: max
+
+	pT9base = phtim->Instance;
+
 	/* Start timer. */
 	phtim->Instance->CR1 = 1;
 
