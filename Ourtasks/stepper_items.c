@@ -90,10 +90,11 @@ void stepper_items_init(TIM_HandleTypeDef *phtim)
 	ptim9 = phtim; // Save locally for faster calling.
 	pT9base = ptim9->Instance;
 
+/* ### NOTE ### These might override STM32CubeMX settings. ### */
 	pT9base->DIER = 0;// None //0x2; // CH1 interrupt enable
 	pT9base->CCR1 = TIM9PULSEDELAY; // Delay count
 	pT9base->ARR  = (TIM9PWMCYCLE - 1); // (10 us)
-	pT9base->CCER = 0x1; // OC active high; signal on pin
+	pT9base->CCER = 0x3; // OC active high; signal on pin
 
 	/* TIM3CH1 100 KHz interrupts. */
 	

@@ -286,7 +286,7 @@ int main(void)
   MX_USART3_UART_Init();
   MX_TIM1_Init();
   MX_I2C1_Init();
-  //MX_TIM2_Init();
+  MX_TIM2_Init();
   MX_TIM3_Init();
   MX_TIM5_Init();
   MX_TIM9_Init();
@@ -765,7 +765,7 @@ static void MX_TIM1_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 35001;//15700;
+  sConfigOC.Pulse = 35001;// 15700;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -979,7 +979,7 @@ static void MX_TIM9_Init(void)
   htim9.Instance = TIM9;
   htim9.Init.Prescaler = 0;
   htim9.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim9.Init.Period = 840;
+  htim9.Init.Period = 1680;
   htim9.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim9.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim9) != HAL_OK)
@@ -1001,7 +1001,7 @@ static void MX_TIM9_Init(void)
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
   sConfigOC.Pulse = 504;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim9, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
   {
