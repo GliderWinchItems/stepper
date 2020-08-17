@@ -72,7 +72,7 @@ static TIM_HandleTypeDef *ptim3;
  * *************************************************************************/
 void stepper_idx_v_struct_hardcode_params(void)
 {
-        stepperstuff.clfactor = 1000.0f; // 100% gives max speed
+        stepperstuff.clfactor = 200.0f; // 100% gives max speed
         stepperstuff.ledctr   = 0;
         stepperstuff.accumpos = 0; // Position accumulator
         return;
