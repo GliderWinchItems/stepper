@@ -78,6 +78,7 @@ HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
   
   /*Configure the TIM12 IRQ priority */
   HAL_NVIC_SetPriority(TIM8_BRK_TIM12_IRQn, TickPriority ,0); 
+  //HAL_NVIC_SetPriority(TIM8_BRK_TIM12_IRQn, 4 ,0); 
   
   /* Enable the TIM12 global Interrupt */
   HAL_NVIC_EnableIRQ(TIM8_BRK_TIM12_IRQn); 
