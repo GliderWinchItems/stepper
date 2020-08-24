@@ -228,7 +228,7 @@ extern TIM_HandleTypeDef htim9;
 			noteuse |= GEVCUBIT05;
 		}
 		if ((noteval & GEVCUBIT06) != 0) 
-		{ // CAN:  
+		{ // CAN:  cid_gps_sync
 			GevcuEvents_06();
 			noteuse |= GEVCUBIT06;
 		}

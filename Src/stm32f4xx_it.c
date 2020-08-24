@@ -150,7 +150,7 @@ hence, 5 words reserved.
 /* USER CODE END EV */
 
 /******************************************************************************/
-/*           Cortex-M4 Processor Interruption and Exception Handlers          */ 
+/*           Cortex-M4 Processor Interruption and Exception Handlers          */
 /******************************************************************************/
 /**
   * @brief This function handles Non maskable interrupt.
@@ -544,20 +544,14 @@ void EXTI15_10_IRQHandler(void)
 /**
   * @brief This function handles TIM8 break interrupt and TIM12 global interrupt.
   */
-#include "DTW_counter.h"
-uint32_t T8n1;
-uint32_t T8diff;
-uint32_t T8max;
-
 void TIM8_BRK_TIM12_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM8_BRK_TIM12_IRQn 0 */
-  T8n1 = DTWTIME;
+  
   /* USER CODE END TIM8_BRK_TIM12_IRQn 0 */
   HAL_TIM_IRQHandler(&htim12);
   /* USER CODE BEGIN TIM8_BRK_TIM12_IRQn 1 */
-  T8diff = DTWTIME - T8n1;
-  if (T8diff > T8max) T8max = T8diff;
+
   /* USER CODE END TIM8_BRK_TIM12_IRQn 1 */
 }
 

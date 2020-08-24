@@ -555,7 +555,7 @@ void GevcuStates_GEVCU_ARM(void)
  	*/
 	if (dmocctl[DMOC_SPEED].sendflag != 0)
 	{
-		control_law_v1_calc(&dmocctl[DMOC_SPEED]); // Version 1: PI Loop
+//		control_law_v1_calc(&dmocctl[DMOC_SPEED]); // Version 1: PI Loop
 
 		/* Setup and send CAN msgs to dmoc in GevcuUpdates.c. */
 	}
