@@ -19,6 +19,7 @@
 #include "dmoc_control.h"
 #include "calib_control_lever.h"
 #include "control_law_v1.h"
+#include "stepper_items.h"
 
 #include "morse.h"
 
@@ -80,6 +81,19 @@ void GevcuUpdates(void)
 	if ((gevcufunction.outstat & CNCTOUT05KA) != 0)
 	{
 		gevcufunction.outstat &= ~CNCTOUT05KA;	
+	}
+
+	if (stepperstuff.CANsend != 0)
+	{
+		stepperstuff.CANsend = 0;
+		/* Send CAN msg to drum node with CL position and DR, EN bits. */
+		// Load float with CL position
+		payloadfloat(&gevcufunction.canmsg[CID_GEVCUR_TST_STEPCMD].can.cd.uc[1],gevcufunction.stepperclpos);
+		// Load byte with enable and direction bits
+		gevcufunction.stepperenbit = HAL_GPIO_ReadPin(EN_port,EN_pin); 
+		gevcufunction.canmsg[CID_GEVCUR_TST_STEPCMD].can.cd.uc[0] = (gevcufunction.stepperdrtoggle & 0x1) | (gevcufunction.stepperenbit << 1);
+		// Queue CAN msg for sending
+		xQueueSendToBack(CanTxQHandle,&gevcufunction.canmsg[CID_GEVCUR_TST_STEPCMD],4);
 	}
 
 	/* Reset new & various flags. */

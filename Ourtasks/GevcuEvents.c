@@ -31,6 +31,7 @@ The CL calibration and ADC->pct position is done via ADC new readings notificati
 #include "dmoc_control.h"
 #include "LEDTask.h"
 #include "shiftregbits.h"
+#include "stepper_items.h"
 
 #include "main.h"
 
@@ -141,6 +142,9 @@ void GevcuEvents_04(void)
 //
 	/* Keepalive and torque command for DMOC */
 	dmoc_control_time(&dmocctl[DMOC_SPEED], gevcufunction.swtim1ctr);
+
+	// Send CAN msg for tick
+	stepperstuff.CANsend = gevcufunction.swtim1ctr & 0x1;
 
 	return;
 }

@@ -77,7 +77,10 @@ void gevcu_func_init_init(struct GEVCUFUNCTION* p, struct ADCFUNCTION* padc)
 	   // Control Law V1: Desired (commanded) speed (float), and integrator (float) */
 	p->canmsg[CID_GEVCUR_CTL_LAWV1].can.id    = p->lc.cid_gevcur_ctllawv1;
 	p->canmsg[CID_GEVCUR_CTL_LAWV1].can.dlc   = 8;	// Two 4 byte fields
- 
+
+	  // Drum test: send CL position plus bits
+	p->canmsg[CID_GEVCUR_TST_STEPCMD].can.id  = p->lc.cid_drum_tst_stepcmd;
+ 	p->canmsg[CID_GEVCUR_TST_STEPCMD].can.dlc = 5; // U8_FF (bits, position float)
 	return;
 }
 /* *************************************************************************

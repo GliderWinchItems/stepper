@@ -484,20 +484,66 @@ void GevcuStates_GEVCU_ARM(void)
 	}
 	#endif
 
-	if (gevcufunction.psw[PSW_ZODOMTR]->db_on == SW_CLOSED)
-	{ 
-		led_retrieve.mode = LED_ON;
-		xQueueSendToBack(LEDTaskQHandle,&led_retrieve,portMAX_DELAY);
-		stepper_items_clupdate(0);
-		HAL_GPIO_WritePin(Stepper__DR__direction_GPIO_Port,Stepper__DR__direction_Pin,GPIO_PIN_SET);
+#ifndef USETHEPREPSWITCHTOBREAKSTATE
+	/* Pressing PREP toggles freezing CL position. */
+	if (gevcufunction.psw[PSW_PB_PREP]->db_on == SW_CLOSED)
+	{
+		if (gevcufunction.stepperclposswprev != SW_CLOSED)
+		{ // Switch went from open to closed
+			gevcufunction.stepperclposswprev = SW_CLOSED;
+			gevcufunction.stepperclpostoggle ^= 0x1;
+			gevcufunction.stepperclpos = clfunc.curpos; // Save current position
+		}
 	}
 	else
+	{ // Here, switch released
+		gevcufunction.stepperclposswprev = SW_OPEN;
+	}
+
+	/* When toggle not ON, update continuously. */
+	if (gevcufunction.stepperclpostoggle == 0)
+	{ // Update postiion sent to stepper
+		led_prep.mode = LED_ON; // PREP state led on
+		xQueueSendToBack(LEDTaskQHandle,&led_prep,portMAX_DELAY);		
+		gevcufunction.stepperclpos = clfunc.curpos; // Save current position
+	}
+	else
+	{ // Don't update position sent to stepper
+		led_prep.mode = LED_OFF; // PREP state led on
+		xQueueSendToBack(LEDTaskQHandle,&led_prep,portMAX_DELAY);				
+	}
+#endif	
+
+	/* When ZODOMTR (retrieve) switch pressed toggle DR (direction) line */
+	if (gevcufunction.psw[PSW_ZODOMTR]->db_on == SW_CLOSED)
+	{ 
+		if (gevcufunction.stepperdrswprev != SW_CLOSED)
+		{
+			gevcufunction.stepperdrswprev = SW_CLOSED;
+			gevcufunction.stepperdrtoggle ^= 0x1;
+		}
+	}
+	else
+	{ // Here switch released
+		gevcufunction.stepperdrswprev = SW_OPEN;
+	}
+
+	if (gevcufunction.stepperdrtoggle == 0)
 	{
 		led_retrieve.mode = LED_OFF;
 		xQueueSendToBack(LEDTaskQHandle,&led_retrieve,portMAX_DELAY);
-		HAL_GPIO_WritePin(Stepper__DR__direction_GPIO_Port,Stepper__DR__direction_Pin,GPIO_PIN_RESET);
-		stepper_items_clupdate(1);
+		HAL_GPIO_WritePin(Stepper__DR__direction_GPIO_Port,Stepper__DR__direction_Pin,GPIO_PIN_SET);
+		stepper_items_clupdate(0,gevcufunction.stepperclpos);
 	}
+	else
+	{
+		led_retrieve.mode = LED_ON;
+		xQueueSendToBack(LEDTaskQHandle,&led_retrieve,portMAX_DELAY);
+		HAL_GPIO_WritePin(Stepper__DR__direction_GPIO_Port,Stepper__DR__direction_Pin,GPIO_PIN_SET);
+		stepper_items_clupdate(1,gevcufunction.stepperclpos);
+
+	}
+
 
 	/* Compute torque request when the GevcuEvents_04 handling of the
       timer notification called dmoc_control_time, and dmoc_control_time

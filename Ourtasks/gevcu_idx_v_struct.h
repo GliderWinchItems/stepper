@@ -65,6 +65,9 @@ struct GEVCULC
 	uint32_t cid_dmoc_cmd_torq;     // CANID_DMOC_CMD_TORQ:  I16_I16_I16_X6, DMOC: cmd: torq,copy,standby,status
 	uint32_t cid_dmoc_cmd_regen;    // CANID_DMOC_CMD_REGEN: I16_I16_X_U8_U8,DMOC: cmd: watt,accel,degC,alive
 	// GEVCUr sends: logger, or PC capture logging, receives.
+	// GEVCUr sends: drum receives
+	uint32_t cid_drum_tst_stepcmd; // CANID_TST_STEPCMD: U8_FF DRUM1: U8: Enable,Direction, FF: CL position: E4600000
+
 
 
  // List of CAN ID's for setting up hw filter for incoming msgs

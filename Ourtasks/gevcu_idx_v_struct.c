@@ -59,8 +59,10 @@ void gevcu_idx_v_struct_hardcode_params(struct GEVCULC* p)
 	p->cid_dmoc_critical_f = 0x056837fc; // CANID_DMOC_CRITICAL_F:    NONE',   'DMOC: Critical Fault: payload = DEADB0FF
 	p->cid_dmoc_hv_status  = 0xCA000000; // 0x650 CANID_DMOC_HV_STATUS: I16_I16_X6,'DMOC: HV volts:amps, status
 	p->cid_dmoc_hv_temps   = 0xCA200000; // 0x651 CANID_DMOC_HV_TEMPS:  U8_U8_U8,  'DMOC: Temperature:rotor,invert,stator
-   // Others send
+     // Others send
 	p->cid_gps_sync     = 0x00400000; // CANID_HB_TIMESYNC:  U8 : GPS_1: U8 GPS time sync distribution msg-GPS time sync msg
+	 // stepper repo: update100K sends
+	p->cid_drum_tst_stepcmd	=  0xE4600000; // CANID_TST_STEPCMD: U8_FF DRUM1: U8: Enable,Direction, FF: CL position:
 
 
 

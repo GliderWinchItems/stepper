@@ -25,6 +25,9 @@
 #define LMOUT_port GPIOE       // Limit switch outside
 #define LMOUT_pin  GPIO_PIN_10 // Limit switch outside
 
+#define DRBIT 0x1  // Bit mask for Direction output pin: 0 = low; 1 = high
+#define ENBIT 0x2  // Bit mask for Enable output pin: 0 = low; 1 = high
+
 
 struct STEPPERSTUFF
 {
@@ -37,6 +40,7 @@ struct STEPPERSTUFF
 	uint16_t speedinc;   // Low 16b of position accumulator
 	int16_t  accumpos_prev; // Previous accumpos (hi-ord 16b)
 	uint32_t drflag;     // BSRR pin set/reset bit position
+	uint8_t  CANsend;    // Send msg
 };
 
 /* *************************************************************************/
@@ -44,9 +48,10 @@ struct STEPPERSTUFF
 /* phtim = pointer to timer handle
  * @brief	: Initialization of channel increment
  * *************************************************************************/
- void stepper_items_clupdate(uint8_t dr);
- /* @param 	: dr = direction: 0 = forward, not 0 = reverse
-  * @brief	: Initialization of channel increment
+void stepper_items_clupdate(uint8_t dr, float cl);
+/* @param 	: dr = direction: 0 = forward, not 0 = reverse
+ * @param   : cl = clfunc.clpos maybe frozen
+ * @brief	: Initialization of channel increment
  * *************************************************************************/
  void stepper_items_IRQHandler(TIM_HandleTypeDef *phtim);
 

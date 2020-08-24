@@ -111,15 +111,16 @@ void stepper_items_init(TIM_HandleTypeDef *phtim)
 	return;
 }
 /* *************************************************************************
- * void stepper_items_clupdate(uint8_t dr);
+ * void stepper_items_clupdate(uint8_t dr, float cl);
  * @param 	: dr = direction: 0 = forward, not 0 = reverse
+ * @param   : cl = clfunc.clpos maybe frozen
  * @brief	: Initialization of channel increment
  * *************************************************************************/
-void stepper_items_clupdate(uint8_t dr)
+void stepper_items_clupdate(uint8_t dr, float cl)
 {
 	stepperstuff.drflag = (Stepper__DR__direction_Pin << (dr*16)); // Save pushbutton state for direction control
 
-	stepperstuff.speedcmdf = clfunc.curpos * stepperstuff.clfactor;
+	stepperstuff.speedcmdf = cl * stepperstuff.clfactor;
 	stepperstuff.speedcmdi = stepperstuff.speedcmdf;
 	if (stepperstuff.speedcmdi > 65535)
 		stepperstuff.speedinc = 65535;
