@@ -1286,7 +1286,7 @@ void StartDefaultTask(void const * argument)
 osDelay(0); // Debugging HardFault
 
 /* Select code for testing/monitoring by uncommenting #defines */
-//#define DISPLAYSTACKUSAGEFORTASKS
+#define DISPLAYSTACKUSAGEFORTASKS
 //#define SHOWEXTENDEDSUMSOFADCRAWREADINGS
 //#define SHOWSUMSOFADCRAWREADINGS
 //#define SHOWINCREASINGAVERAGEOFADCRAWREADINGS
@@ -1558,7 +1558,8 @@ case  3: stackwatermark_show(MailboxTaskHandle,&pbuf4,"MailboxTask--");break;
 case  4: stackwatermark_show(ADCTaskHandle    ,&pbuf1,"ADCTask------");break;
 case  5: stackwatermark_show(SerialTaskReceiveHandle,&pbuf2,"SerialRcvTask");break;
 case  6: stackwatermark_show(GatewayTaskHandle,&pbuf3,"GatewayTask--");break;
-case  7: stackwatermark_show(CdcTxTaskSendHandle,&pbuf4,"CdcTxTask----");break;
+//case  7: stackwatermark_show(CdcTxTaskSendHandle,&pbuf4,"CdcTxTask----");break;
+case 7: break;
 case  8: stackwatermark_show(SpiOutTaskHandle, &pbuf1,"SpiOutTask---");break;
 case  9: stackwatermark_show(GevcuTaskHandle,  &pbuf2,"GevcuTask----");break;
 case 10: stackwatermark_show(BeepTaskHandle,   &pbuf3,"BeepTask-----");break;
