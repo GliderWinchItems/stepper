@@ -138,7 +138,6 @@ uint32_t LEDx;
 void stepper_items_IRQHandler(TIM_HandleTypeDef *phtim)
 {
 	__attribute__((__unused__))int temp;
-	int32_t tmp;
 
 	pT9base->SR = ~(0x1F);	// Reset CH1 flag (and all flags)
 

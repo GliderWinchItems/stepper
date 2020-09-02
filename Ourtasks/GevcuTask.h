@@ -245,6 +245,8 @@ struct GEVCUFUNCTION
 	uint8_t stepperclposswprev;
 	uint8_t stepperclpostoggle;
 	uint8_t stepperenbit;
+	uint8_t stepperlmbit;
+	uint8_t stepperixbit;
 	float	stepperclpos; // CL position to sent to stepper
 
 	uint8_t state;      // Gevcu main state

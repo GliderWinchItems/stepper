@@ -140,6 +140,10 @@ void Error_Handler(void);
 #define LED_BLUE_GPIO_Port GPIOD
 #define Beeper_Pin GPIO_PIN_8
 #define Beeper_GPIO_Port GPIOA
+#define JUMP_OUT_Pin GPIO_PIN_0
+#define JUMP_OUT_GPIO_Port GPIOE
+#define JUMP_IN_Pin GPIO_PIN_1
+#define JUMP_IN_GPIO_Port GPIOE
 /* USER CODE BEGIN Private defines */
 // ===============================================================================
 // USART/UART assignments

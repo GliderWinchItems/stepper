@@ -544,6 +544,15 @@ void GevcuStates_GEVCU_ARM(void)
 
 	}
 
+	/* Pushbutton to simulate stepper limit switch. */
+	if (gevcufunction.psw[PSW_ZTENSION]->db_on == SW_CLOSED)
+	{
+		gevcufunction.stepperlmbit = LMBIT;
+	}
+	else
+	{
+		gevcufunction.stepperlmbit = 0;	
+	}
 
 	/* Compute torque request when the GevcuEvents_04 handling of the
       timer notification called dmoc_control_time, and dmoc_control_time

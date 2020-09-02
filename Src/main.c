@@ -140,6 +140,9 @@ uint8_t canflag2;
 
 uint8_t lcdflag = 0;
 
+// PE0-PE1 jumper test
+uint32_t PE01test; // 0 = GSM; not 0 = DEH
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -341,6 +344,14 @@ DiscoveryF4 LEDs --
   //osDelay(0);
 //taskEXIT_CRITICAL();
 
+  /* Test for jumper of DiscoveryF4 board PE0-PE1. */
+  // PE1 high == DEH setup
+  //HAL_GPIO_WritePin(JUMP_OUT_GPIO_Port,JUMP_OUT_Pin,GPIO_PIN_SET);
+  //PE01test = HAL_GPIO_ReadPin(JUMP_IN_GPIO_Port,JUMP_IN_Pin);
+  //if (PE01test == 0)
+ // {
+//    htim2.Instance->CCR1 = 35001;
+//  }
 
 	/* Create serial task (priority) */
 	// Task handle "osThreadId SerialTaskHandle" is global
@@ -765,7 +776,7 @@ static void MX_TIM1_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 35001;//15700;
+  sConfigOC.Pulse = 35001; //15700;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -1172,7 +1183,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(Beeper_Drive_GPIO_Port, Beeper_Drive_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, Beeper_Drive_Pin|JUMP_OUT_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
@@ -1233,6 +1244,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : JUMP_OUT_Pin */
+  GPIO_InitStruct.Pin = JUMP_OUT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
+  HAL_GPIO_Init(JUMP_OUT_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : JUMP_IN_Pin */
+  GPIO_InitStruct.Pin = JUMP_IN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(JUMP_IN_GPIO_Port, &GPIO_InitStruct);
+
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 11, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
@@ -1250,7 +1274,7 @@ static struct LCDMSGSET lcdi2cfunc3;
 static struct LCDMSGSET lcdi2cfunc4;
   #endif
 //                                                                       "12345678901234567890"
-static void lcdi2cmsgm1 (union LCDSETVAR u){lcdi2cputs  (&punitd4x20,0,0,"stp100KD 20200824 04");}
+static void lcdi2cmsgm1 (union LCDSETVAR u){lcdi2cputs  (&punitd4x20,0,0,"stp100KD 20200826 05");}
   #ifdef TWOCALLSWITHONEARGUMENT  
 static void lcdi2cmsgM1a(union LCDSETVAR u){lcdi2cprintf(&punitd4x20,DMOCSPDTQ, 0,"S%6i  ",   u.u32);}
 static void lcdi2cmsgM1b(union LCDSETVAR u){lcdi2cprintf(&punitd4x20,DMOCSPDTQ, 9,"T%6.1f  ",u.f);}
@@ -1286,7 +1310,7 @@ void StartDefaultTask(void const * argument)
 osDelay(0); // Debugging HardFault
 
 /* Select code for testing/monitoring by uncommenting #defines */
-#define DISPLAYSTACKUSAGEFORTASKS
+//#define DISPLAYSTACKUSAGEFORTASKS
 //#define SHOWEXTENDEDSUMSOFADCRAWREADINGS
 //#define SHOWSUMSOFADCRAWREADINGS
 //#define SHOWINCREASINGAVERAGEOFADCRAWREADINGS
@@ -1503,7 +1527,7 @@ uint8_t ratepace = 0;
 
       lcdi2cfunc5.u.u32two[0] = stepperstuff.speedcmdi;
 uint16_t pbpin = GPIOB->ODR;
-    yprintf(&pbuf4,"\n\rINC%6u| RPM %6.1f| PB %04x",stepperstuff.speedcmdi,lcdi2cfunc5.u.ftwo[1],pbpin);//stepperstuff.drflag);
+    yprintf(&pbuf4,"\n\rINC%6u| RPM %6.1f| Pay0 %04x",stepperstuff.speedcmdi,lcdi2cfunc5.u.ftwo[1],gevcufunction.canmsg[CID_GEVCUR_TST_STEPCMD].can.cd.uc[0]);
 
 
 #endif      

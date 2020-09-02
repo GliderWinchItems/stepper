@@ -88,7 +88,7 @@ void StartADCTask(void const * argument)
 		/* Notify GevcuTask that new readings are ready. */
 		if( GevcuTaskHandle == NULL) morse_trap(51); // JIC task has not been created
 		
-		xTaskNotify(GevcuTaskHandle, GEVCUBIT00, eSetBits);
+//		xTaskNotify(GevcuTaskHandle, GEVCUBIT00, eSetBits);
 
 
 		/* Sum the readings 1/2 of DMA buffer to an array. */
