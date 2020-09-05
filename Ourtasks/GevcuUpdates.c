@@ -88,8 +88,24 @@ void GevcuUpdates(void)
 	{
 		stepperstuff.CANsend = 0;
 		/* Send CAN msg to drum node with CL position and DR, EN bits. */
+
 		// Load float with CL position
-		payloadfloat(&gevcufunction.canmsg[CID_GEVCUR_TST_STEPCMD].can.cd.uc[1],gevcufunction.stepperclpos);
+	/* When toggle not ON, update continuously. */
+		if (gevcufunction.stepperclpostoggle != 0)
+		{ // Toggled state: freeze minimum
+			if (clfunc.curpos > gevcufunction.stepperclpos)
+			{
+				payloadfloat(&gevcufunction.canmsg[CID_GEVCUR_TST_STEPCMD].can.cd.uc[1],clfunc.curpos);
+			}
+			else
+			{
+				payloadfloat(&gevcufunction.canmsg[CID_GEVCUR_TST_STEPCMD].can.cd.uc[1],gevcufunction.stepperclpos);
+			}
+		}
+		else
+		{ // Not toggled
+			payloadfloat(&gevcufunction.canmsg[CID_GEVCUR_TST_STEPCMD].can.cd.uc[1],gevcufunction.stepperclpos);			
+		}
 
 /* CAN msg: cid_drum_tst_stepcmd: payload[0] bit definitions. 
  CAN msg: cid_drum_tst_stepcmd: payload[0] bit definitions. 
