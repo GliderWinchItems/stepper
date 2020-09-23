@@ -131,7 +131,7 @@ void GevcuEvents_03(void)
  * @brief	: TIMER1: Software timer 1
  * *************************************************************************/
 uint32_t dbgev04;
-
+uint32_t shamelesshack1 = 0;
 
 void GevcuEvents_04(void)
 {
@@ -144,7 +144,12 @@ void GevcuEvents_04(void)
 	dmoc_control_time(&dmocctl[DMOC_SPEED], gevcufunction.swtim1ctr);
 
 	// Send CAN msg for tick
-	stepperstuff.CANsend = gevcufunction.swtim1ctr & 0x1;
+	shamelesshack1 += 1;
+	if (shamelesshack1 >= 100)
+	{
+		shamelesshack1 -= 1;
+		stepperstuff.CANsend = gevcufunction.swtim1ctr & 0x1;
+}
 
 	return;
 }
