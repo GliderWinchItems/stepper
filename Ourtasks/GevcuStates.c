@@ -305,7 +305,7 @@ void GevcuStates_GEVCU_SAFE(void)
  * *************************************************************************/
 //  20 chars will over-write all display chars from previous msg:       12345678901234567890
 //static void lcdmsg5   (void)             {lcdprintf (&gevcufunction.pbuflcd3,GEVCUTSK,0,"GEVCU_ACTIVE_TRANSIT");}
-static void lcdi2cmsg5(union LCDSETVAR u){lcdi2cputs(&punitd4x20,           GEVCUTSK,0,"GEVCU_ACTIVE_TRANSIT");}
+static void lcdi2cmsg5(union LCDSETVAR u){lcdi2cputs(&punitd4x20,           GEVCUTSK,0,"GEVCU_PREP TRANSITIO");}
 
 void GevcuStates_GEVCU_ACTIVE_TRANSITION(void)
 {
@@ -359,7 +359,7 @@ void GevcuStates_GEVCU_ACTIVE_TRANSITION(void)
  * *************************************************************************/
 //  20 chars will over-write all display chars from previous msg:       12345678901234567890
 //static void lcdmsg6   (void)             {lcdprintf (&gevcufunction.pbuflcd3,GEVCUTSK,0,"GEVCU_ACTIVE        ");}
-static void lcdi2cmsg6(union LCDSETVAR u){lcdi2cputs(&punitd4x20,           GEVCUTSK,0,"GEVCU_ACTIVE        ");}
+static void lcdi2cmsg6(union LCDSETVAR u){lcdi2cputs(&punitd4x20,           GEVCUTSK,0,"GEVCU_PREP          ");}
 
 
 void GevcuStates_GEVCU_ACTIVE(void)
@@ -377,22 +377,29 @@ void GevcuStates_GEVCU_ACTIVE(void)
 	    	xQueueSendToBack(LcdmsgsetTaskQHandle, &lcdi2cfunc, 0);
 	}
 
-	/* Wait for ARM pushbutton to be pressed. */	
-//	if (gevcufunction.psw[PSW_PB_ARM]->db_on != SW_CLOSED)
-//		return;
+	/* Wait for PREP pushbutton to be pressed (toggle logic). */	
+	if (gevcufunction.psw[PSW_PB_PREP]->db_on != SW_CLOSED)
+	{ // Here, pushbutton is open
+		gevcufunction.pbprep_prev = SW_OPEN; 
+	}
+	else
+	{ // Here pushbutton is closed
+		if (gevcufunction.pbprep_prev != SW_CLOSED)
+		{ // Here pushbutton was previously open
+			gevcufunction.pbprep_prev = SW_CLOSED; 
 	
-	/* Here, ARM_PB pressed, requesting ARMed state. */
+			HAL_GPIO_WritePin(EN_port,EN_pin, GPIO_PIN_SET); // Enable Stepper motor
 
-	HAL_GPIO_WritePin(EN_port,EN_pin, GPIO_PIN_SET); // Enable Stepper motor
+			led_arm_pb.mode = LED_ON; // ARM Pushbutton LED
+			xQueueSendToBack(LEDTaskQHandle,&led_arm_pb,portMAX_DELAY);
 
-	led_arm_pb.mode = LED_ON; // ARM Pushbutton LED
-	xQueueSendToBack(LEDTaskQHandle,&led_arm_pb,portMAX_DELAY);
+			led_prep.mode = LED_OFF; // PREP state LED
+			xQueueSendToBack(LEDTaskQHandle,&led_prep,portMAX_DELAY);
 
-	led_prep.mode = LED_OFF; // PREP state LED
-	xQueueSendToBack(LEDTaskQHandle,&led_prep,portMAX_DELAY);
-
-	msgflag = 0; // Allow next LCD msg to be sent once
-	gevcufunction.state = GEVCU_ARM_TRANSITION;
+			msgflag = 0; // Allow next LCD msg to be sent once
+			gevcufunction.state = GEVCU_ARM_TRANSITION;
+		}
+	}
 	return;
 }
 /* *************************************************************************
@@ -454,34 +461,53 @@ void GevcuStates_GEVCU_ARM_TRANSITION(void)
  * void GevcuStates_GEVCU_ARM(void);
  * @brief	: Contactor & DMOC are ready. Keep fingers to yourself.
  * *************************************************************************/
+static void lcdi2cmsg10(union LCDSETVAR u){lcdi2cputs(&punitd4x20,LCDLEVELWIND,0,"LW nomode     ");}
+static void lcdi2cmsg11(union LCDSETVAR u){lcdi2cputs(&punitd4x20,LCDLEVELWIND,0,"LW OFF        ");}
+static void lcdi2cmsg12(union LCDSETVAR u){lcdi2cputs(&punitd4x20,LCDLEVELWIND,0,"LW CENTER     ");}
+static void lcdi2cmsg13(union LCDSETVAR u){lcdi2cputs(&punitd4x20,LCDLEVELWIND,0,"LW TRACK      ");}
+
+#define USETHEPREPSWITCHTOBREAKSTATE 
+
 void GevcuStates_GEVCU_ARM(void)
 {
 #ifdef USETHEPREPSWITCHTOBREAKSTATE
-	/* Pressing PREP returns to ACTIVE, (not armed) state. */
-	if (gevcufunction.psw[PSW_PB_PREP]->db_on == SW_CLOSED)
-	{
-		led_prep.mode = LED_ON; // PREP state led on
-		xQueueSendToBack(LEDTaskQHandle,&led_prep,portMAX_DELAY);
 
-		led_arm.mode = LED_OFF; // ARM state LED
-		xQueueSendToBack(LEDTaskQHandle,&led_arm,portMAX_DELAY);
-
-		/* Return stepper to disabled, safe state. */
-		HAL_GPIO_WritePin(EN_port,EN_pin, GPIO_PIN_RESET); // Disable Stepper motor
-
-
-		/* Set DMOC torque and integrator to zero. */
-		control_law_v1_reset();
-
-		// Set desired speed CAN msg payload to zero.
-		payloadfloat(&gevcufunction.canmsg[CID_GEVCUR_CTL_LAWV1].can.cd.uc[0],0);
-
-		/* Be sure to update LCD msg. */
-		msgflag = 0;
-
-		gevcufunction.state = GEVCU_ACTIVE_TRANSITION;
-		return;		
+	/* Pressing PREP toggles back to ACTIVE state. */
+	if (gevcufunction.psw[PSW_PB_PREP]->db_on != SW_CLOSED)
+	{ // Here, pushbutton is open
+		gevcufunction.pbprep_prev = SW_OPEN; 
 	}
+	else
+	{ // Here pushbutton is closed
+		if (gevcufunction.pbprep_prev != SW_CLOSED)
+		{ // Here pushbutton was previously open
+			gevcufunction.pbprep_prev = SW_CLOSED; 
+
+			led_prep.mode = LED_ON; // PREP state led on
+			xQueueSendToBack(LEDTaskQHandle,&led_prep,portMAX_DELAY);
+
+			led_arm.mode = LED_OFF; // ARM state LED
+			xQueueSendToBack(LEDTaskQHandle,&led_arm,portMAX_DELAY);
+
+			/* Return stepper to disabled, safe state. */
+			HAL_GPIO_WritePin(EN_port,EN_pin, GPIO_PIN_RESET); // Disable Stepper motor
+
+
+			/* Set DMOC torque and integrator to zero. */
+			control_law_v1_reset();
+
+			// Set desired speed CAN msg payload to zero.
+			payloadfloat(&gevcufunction.canmsg[CID_GEVCUR_CTL_LAWV1].can.cd.uc[0],0);
+
+			/* Be sure to update LCD msg. */
+			msgflag = 0;
+
+			gevcufunction.state = GEVCU_ACTIVE_TRANSITION;
+			return;		
+		}
+	}
+
+	gevcufunction.stepperclpos = clfunc.curpos; // Save current position 
 	#endif
 
 #ifndef USETHEPREPSWITCHTOBREAKSTATE
@@ -553,6 +579,35 @@ void GevcuStates_GEVCU_ARM(void)
 	{
 		gevcufunction.stepperlmbit = 0;	
 	}
+
+	/* Pushbutton to simuilate Levelwind OFF-CENTER-TRACK */
+	if (gevcufunction.psw[PSW_PB_ARM]->db_on != SW_CLOSED)
+	{ // Here, pushbutton is open
+		gevcufunction.pbarm_prev = SW_OPEN; 
+	}
+	else
+	{ // Here pushbutton is closed
+		if (gevcufunction.pbarm_prev != SW_CLOSED)
+		{ // Here pushbutton was previously open
+			gevcufunction.pbarm_prev = SW_CLOSED; 
+			// Advance levelwind mode (sequence: 01, 10, 11)
+			gevcufunction.levelwindmode = (gevcufunction.levelwindmode + 1) & 0x3;
+			if (gevcufunction.levelwindmode == 0) gevcufunction.levelwindmode = 1;
+
+			/* LCD message. */
+			switch (gevcufunction.levelwindmode)
+			{
+			case 0: lcdi2cfunc.ptr = lcdi2cmsg10; break;
+			case 1: lcdi2cfunc.ptr = lcdi2cmsg11; break;
+			case 2: lcdi2cfunc.ptr = lcdi2cmsg12; break;
+			case 3: lcdi2cfunc.ptr = lcdi2cmsg13; break;
+			}
+			// Place ptr to struct w ptr 
+	 		if (LcdmsgsetTaskQHandle != NULL)
+    			xQueueSendToBack(LcdmsgsetTaskQHandle, &lcdi2cfunc, 0);
+		}
+	}
+
 
 	/* Compute torque request when the GevcuEvents_04 handling of the
       timer notification called dmoc_control_time, and dmoc_control_time

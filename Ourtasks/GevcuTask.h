@@ -105,12 +105,14 @@ NOTES:
 /* Number of different CAN id msgs this function sends. */
 //#define NUMCANMSGS 6
 //#define NUMCANMSGS 7 // Add 7th for sending control_law_v1 desired speed
-#define NUMCANMSGS 8 // Add 8th for sending CL position plus bits 
+#define NUMCANMSGS 10 // Add 8th for sending CL position plus bits 
 
 /* Indices for array below of "struct CANTXQMSG canmsg[NUMCANMSGS];" */
 #define CID_GEVCUR_KEEPALIVE_R  0 // cid_gevcur_keepalive_r
 #define CID_GEVCUR_CTL_LAWV1    6 // Desired speed commanded
 #define CID_GEVCUR_TST_STEPCMD  7 // CL position CAN msg
+#define CID_GEVCUR_HB_CBSWSV1   8 // Version 1 Control Panel switches
+#define CID_GEVCUR_MC_STATE     9 // Faux MC system state msgs
 
 /* Number of switches for GEVCU task */
 #define NUMGEVCUPUSHBUTTONS 5
@@ -248,6 +250,15 @@ struct GEVCUFUNCTION
 	uint8_t stepperlmbit;
 	uint8_t stepperixbit;
 	float	stepperclpos; // CL position to sent to stepper
+
+	/* Simulated OFF-CENTER-TRACK switch */
+	uint8_t levelwindmode; // PB cycles thru 01,10,11
+	   //  00 = not applicable
+	   //  01 = Track
+       //  10 = Center
+       //  11 = Off 
+	uint8_t pbarm_prev;
+	uint8_t pbprep_prev;
 
 	uint8_t state;      // Gevcu main state
 	uint8_t substateA;  // 

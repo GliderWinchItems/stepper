@@ -46,6 +46,9 @@ void gevcu_func_init_init(struct GEVCUFUNCTION* p, struct ADCFUNCTION* padc)
 	p->ka_k       = (p->lc.ka_t);   // Gevcu polling timer (configTICK_RATE_HZ = 512)
 	p->keepalive_k= (p->lc.keepalive_t); // keep-alive timeout (timeout delay ms)
 	p->hbct_k     = (p->lc.hbct_t); // Heartbeat ct: ticks between sending msgs hv1:cur1
+
+	/* Levelwind OFF-CENTER-TRACK switch simulation. */
+	p->levelwindmode = 0x3; // Initial = OFF
 	
 // Skip CAN msg arrival notifications for lines that are commented out.
 	/* Add CAN Mailboxes                         CAN           CAN ID        Notify bit   Paytype */
@@ -70,7 +73,7 @@ void gevcu_func_init_init(struct GEVCUFUNCTION* p, struct ADCFUNCTION* padc)
 	}
 
 	/* Pre-load CAN ids & in some cases, dlc. */
-   	// Contactor keepalive/command msg.
+   	   // Contactor keepalive/command msg.
 	p->canmsg[CID_GEVCUR_KEEPALIVE_R].can.id  = p->lc.cid_cntctr_keepalive_i;
 	p->canmsg[CID_GEVCUR_KEEPALIVE_R].can.dlc = 1;  // Single byte status
 
@@ -81,6 +84,14 @@ void gevcu_func_init_init(struct GEVCUFUNCTION* p, struct ADCFUNCTION* padc)
 	  // Drum test: send CL position plus bits
 	p->canmsg[CID_GEVCUR_TST_STEPCMD].can.id  = p->lc.cid_drum_tst_stepcmd;
  	p->canmsg[CID_GEVCUR_TST_STEPCMD].can.dlc = 5; // U8_FF (bits, position float)
+
+ 	  // Drum:levelwind version 1 control panel switches
+	p->canmsg[CID_GEVCUR_HB_CBSWSV1].can.id = p->lc.cid_hb_cpswsv1_1; // CANID_HB_CPSWSV1_1','31000000', S8_U8_7',
+
+	  // Faux MC system state msgs
+	p->canmsg[CID_GEVCUR_MC_STATE].can.id  = p->lc.cid_mc_state; // CANID_MC_STATE','26000000','MC' MC: Launch state msg'
+	p->canmsg[CID_GEVCUR_MC_STATE].can.dlc = 5;
+ 	
 	return;
 }
 /* *************************************************************************

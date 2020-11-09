@@ -155,9 +155,58 @@ void GevcuUpdates(void)
 		if (gevcufunction.psw[PSW_PB_PREP]->db_on == SW_CLOSED)
 			gevcufunction.canmsg[CID_GEVCUR_TST_STEPCMD].can.cd.uc[0] |= PRBIT;
 
-
 		// Queue CAN msg for sending
 		xQueueSendToBack(CanTxQHandle,&gevcufunction.canmsg[CID_GEVCUR_TST_STEPCMD],4);
+
+
+		/* =========== CPSWSV1_1 ============= */
+		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[0] = 0; // Status = green, no issues
+		/*
+		  bit 7 – SAFE/ACTIVE (R-S toggle)
+         0  = safe
+         1 = active
+ bit 6 - (pushbutton)  Arm 
+ bit 5 – (pushbutton) Retrieve
+ bit 4 – (pushbutton) Zero Tension
+ bit 3 – (pushbutton) Zero Odometer  
+ bit 2 – (pushbutton) Apply brake
+ bit 1 – (pushbutton) Actuate guillotine
+ bit 0 – (pushbutton) Emergency
+*/
+
+		// SAFE/ACTIVE switch
+		if (gevcufunction.psw[PSW_PR_SAFE]->db_on == SWP_OPEN )
+		{ // Here SAFE/ACTIVE switch is in ACTIVE position
+			gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[1] = 1;
+		}
+		else
+		{	
+			gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[1] = 0;
+		}			
+		// Debounced pushbuttons
+		if (gevcufunction.psw[PSW_PB_ARM]->db_on == SW_CLOSED)
+			gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[1] |= (1<<6);
+
+		if (gevcufunction.psw[PSW_PB_PREP]->db_on == SW_CLOSED)
+			gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[1] |= (1<<5);
+
+		if (gevcufunction.psw[PSW_ZTENSION]->db_on == SW_CLOSED) 
+			gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[1] |= (1<<4);
+
+		if (gevcufunction.psw[PSW_ZODOMTR]->db_on == SW_CLOSED)
+			gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[1] |= (1<<3);
+
+
+		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[2] = (gevcufunction.levelwindmode << 6); // Levelwind Mode 2 bits; Drum #1 selected
+		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[3] = 1; // Drum #1 active
+		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[4] = 0; // spare
+		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[5] = 0; // spare
+		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[6] = 0; // spare
+		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[7] = 0; // spare
+				// Queue CAN msg for sending
+		xQueueSendToBack(CanTxQHandle,&gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1],4);
+		/* ========== CPSWSCLV1 ============== */
+
 	}
 
 	/* Reset new & various flags. */

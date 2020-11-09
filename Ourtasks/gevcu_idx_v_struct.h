@@ -66,8 +66,11 @@ struct GEVCULC
 	uint32_t cid_dmoc_cmd_regen;    // CANID_DMOC_CMD_REGEN: I16_I16_X_U8_U8,DMOC: cmd: watt,accel,degC,alive
 	// GEVCUr sends: logger, or PC capture logging, receives.
 	// GEVCUr sends: drum receives
-	uint32_t cid_drum_tst_stepcmd; // CANID_TST_STEPCMD: U8_FF DRUM1: U8: Enable,Direction, FF: CL position: E4600000
-
+	uint32_t cid_drum_tst_stepcmd;  // CANID_TST_STEPCMD: U8_FF DRUM1: U8: Enable,Direction, FF: CL position: E4600000
+	uint32_t cid_mc_sys_state;      // CANID_MC_SYSTEM_STATE','50000000','MC','U8','MC: System state: U8 = high|low nibbles ');
+	uint32_t cid_hb_cpswsv1_1;      // CANID_HB_CPSWSV1_1','31000000','CPMC',    1,1,'S8_U8_7','HB_CPSWSV1 1: S8:status,U8[7]: status,switches,drum sel,operational,spare,spare');
+	// GEVCUr sends: all receive and monitor
+	uint32_t cid_mc_state;          // CANID_MC_STATE','26000000','MC',1,5,'UNDEF','MC: Launch state msg');
 
 
  // List of CAN ID's for setting up hw filter for incoming msgs
@@ -75,7 +78,7 @@ struct GEVCULC
 	uint32_t cid_cntctr_keepalive_r; // CANID_CMD_CNTCTRKAR: U8_U8_U8: Contactor1: R KeepAlive response to poll
      // PC sends;  we receive 
 	uint32_t cid_gevcur_keepalive_i; // CANID_CMD_GEVCURKAI:U8 : GEVCUr: I KeepAlive and connect command
-   // DMOC sends; we receive
+     // DMOC sends; we receive
 	uint32_t cid_dmoc_actualtorq; // CANID_DMOC_ACTUALTORQ:I16,   DMOC: Actual Torque: payload-30000
 	uint32_t cid_dmoc_speed;      // CANID_DMOC_SPEED:     I16_X6,DMOC: Actual Speed (rpm?)
 	uint32_t cid_dmoc_dqvoltamp;  // CANID_DMOC_DQVOLTAMP: I16_I16_I16_I16','DMOC: D volt:amp, Q volt:amp
@@ -83,8 +86,11 @@ struct GEVCULC
 	uint32_t cid_dmoc_critical_f; // CANID_DMOC_CRITICAL_F:    NONE',   'DMOC: Critical Fault: payload = DEADB0FF
 	uint32_t cid_dmoc_hv_status;  // CANID_DMOC_HV_STATUS: I16_I16_X6,'DMOC: HV volts:amps, status
 	uint32_t cid_dmoc_hv_temps;   // CANID_DMOC_HV_TEMPS:  U8_U8_U8,  'DMOC: Temperature:rotor,invert,stator
-   // GPS/Logger sends; we receive
+     // GPS/Logger sends; we receive
 	uint32_t cid_gps_sync; // CANID_HB_TIMESYNC:  U8 : GPS_1: U8 GPS time sync distribution msg-GPS time sync msg
+     // Levelwind sends: we receive
+	uint32_t cid_levelwind_hb1;  //CANID_HB_LEVELWIND_1','80000000','LEVELWIND',1,2,'S8_U8','DRUM 1: S8:Status,U8:LW switches');
+	uint32_t cid_levelwind_cmd1; // CANID_CMD_LEVELWIND_1R','B1000114','LEVELWIND',1,3,'U8_U8_X4','1: U8:drum bits,U8:command code,X4:four byte value');
 
  };
 

@@ -1,0 +1,34 @@
+stepperwiring.txt
+Stepper: F4-Controller & Stepper wiring
+10/10/2020
+
+Stepperonline
+www.omc-stepperonline.com
+
+Stepper 23HS22-28045
+Controller DM542Y
+
+Columns
+1 F4 Discovery
+2 Ribbon-FET module
+3 FET - Controller
+4 Controller
+
+gnd  blk   blk   ...
++5v  red   red   MF+ PU+ DR+ MF+ 
+PE5  wht   yel   PU-
+PB0  brn   grn   DR-
+PB1  org   blu   MF-
+
+Stepper windings
+1 blk A
+2 grn A\
+3 red B
+4 blu B\
+
+Step
+
+1  +   +   -   -  
+2  -   +   +   -
+3  -   -   +   +
+4  +   -   -   +

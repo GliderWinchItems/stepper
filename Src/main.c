@@ -1274,7 +1274,7 @@ static struct LCDMSGSET lcdi2cfunc3;
 static struct LCDMSGSET lcdi2cfunc4;
   #endif
 //                                                                       "12345678901234567890"
-static void lcdi2cmsgm1 (union LCDSETVAR u){lcdi2cputs  (&punitd4x20,0,0,"stp100KD 20200826 05");}
+static void lcdi2cmsgm1 (union LCDSETVAR u){lcdi2cputs  (&punitd4x20,0,0,"stpLVLWD 20201108 06");}
   #ifdef TWOCALLSWITHONEARGUMENT  
 static void lcdi2cmsgM1a(union LCDSETVAR u){lcdi2cprintf(&punitd4x20,DMOCSPDTQ, 0,"S%6i  ",   u.u32);}
 static void lcdi2cmsgM1b(union LCDSETVAR u){lcdi2cprintf(&punitd4x20,DMOCSPDTQ, 9,"T%6.1f  ",u.f);}
@@ -1314,14 +1314,14 @@ osDelay(0); // Debugging HardFault
 //#define SHOWEXTENDEDSUMSOFADCRAWREADINGS
 //#define SHOWSUMSOFADCRAWREADINGS
 //#define SHOWINCREASINGAVERAGEOFADCRAWREADINGS
-//#define SHOWSERIALPARALLELSTUFF
+#define SHOWSERIALPARALLELSTUFF
 //#define STARTUPCHASINGLEDS
 //#define TESTBEEPER
 //#define SENDCANTESTMSGSINABURST
 //#define SHOWADCCOMMONCOMPUTATIONS
 //#define DMOCTESTS
 //#define CONTROLV1DEBUG
-#define STEPPERSHOW
+//#define STEPPERSHOW
 
 	#define DEFAULTTSKBIT00	(1 << 0)  // Task notification bit for sw timer: stackusage
 	#define DEFAULTTSKBIT01	(1 << 1)  // Task notification bit for sw timer: something else
