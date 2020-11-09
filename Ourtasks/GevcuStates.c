@@ -411,7 +411,7 @@ void GevcuStates_GEVCU_ACTIVE(void)
 //static void lcdi2cmsg7(union LCDSETVAR u){lcdi2cputs(&punitd4x20,           GEVCUTSK,0,"ARM: MOVE CL ZERO   ");}
 
 //static void lcdmsg8   (void){lcdprintf (&gevcufunction.pbuflcd3,GEVCUTSK,0,"GEVCU_ARM           ");}
-static void lcdi2cmsg8(union LCDSETVAR u){lcdi2cputs(&punitd4x20,           GEVCUTSK,0,"GEVCU_ARM           ");}
+static void lcdi2cmsg8(union LCDSETVAR u){lcdi2cputs(&punitd4x20,           GEVCUTSK,0,"GEVCU_RETRIEVE      ");}
 
 void GevcuStates_GEVCU_ARM_TRANSITION(void)
 {

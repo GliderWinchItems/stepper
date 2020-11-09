@@ -261,6 +261,7 @@ struct GEVCUFUNCTION
 	uint8_t pbprep_prev;
 
 	uint8_t state;      // Gevcu main state
+	uint8_t mc_state;   // Faux MC state
 	uint8_t substateA;  // 
 	uint8_t substateB;  // spare substate 
 
