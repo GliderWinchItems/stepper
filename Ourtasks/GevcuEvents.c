@@ -149,7 +149,7 @@ void GevcuEvents_04(void)
 	{
 		shamelesshack1 -= 1;
 		stepperstuff.CANsend = gevcufunction.swtim1ctr & 0x1;
-}
+	}
 
 	return;
 }

@@ -46,6 +46,7 @@ struct GEVCULC
 	uint32_t ka_dmoc_r_t; // DMOC sending keepalive/command (ms)
 	uint32_t ka_dmoc_i_t; // DMOC failed to receive timeout (ms)
 	uint32_t hbct_t;      // Heartbeat ct: ticks between sending 
+	uint32_t mc_hb_state_t; // MC state msg: time between hb (ms)
 
 	/* Test parameters. */
 	float vmax;    // Motor speed limit in plus direction

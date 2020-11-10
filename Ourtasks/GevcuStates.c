@@ -252,6 +252,10 @@ void GevcuStates_GEVCU_SAFE_TRANSITION(void)
 	msgflag = 0; // Allow next LCD msg to be sent once
 
 	gevcufunction.state = GEVCU_SAFE;
+
+	/* Set a faux MC_STATE for Levelwind testing. */
+	gevcufunction.canmsg[CID_GEVCUR_MC_STATE].can.cd.uc[0]= MC_SAFE;
+
 	return;
 }
 /* *************************************************************************
@@ -351,6 +355,10 @@ void GevcuStates_GEVCU_ACTIVE_TRANSITION(void)
 
 	msgflag = 0; // Allow next LCD msg to be sent once
 	gevcufunction.state = GEVCU_ACTIVE;
+
+	/* Set a faux MC_STATE for Levelwind testing. */
+	gevcufunction.canmsg[CID_GEVCUR_MC_STATE].can.cd.uc[0]= MC_PREP;
+
 	return;
 }
 /* *************************************************************************
@@ -455,6 +463,9 @@ void GevcuStates_GEVCU_ARM_TRANSITION(void)
 
 		msgflag = 0; // Allow next LCD msg to be sent once
 		gevcufunction.state = GEVCU_ARM;
+
+		/* Set a faux MC_STATE for Levelwind testing. */
+		gevcufunction.canmsg[CID_GEVCUR_MC_STATE].can.cd.uc[0]= MC_RETRIEVE;
 		return;
 }
 /* *************************************************************************

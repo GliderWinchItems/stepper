@@ -84,6 +84,20 @@ void GevcuUpdates(void)
 		gevcufunction.outstat &= ~CNCTOUT05KA;	
 	}
 
+	/* ========== Faux MC_STATE ========== */
+	if (gevcufunction.canmsg[CID_GEVCUR_MC_STATE].can.cd.uc[0] != gevcufunction.mc_state_prev)
+	{
+		gevcufunction.mc_state_prev = gevcufunction.canmsg[CID_GEVCUR_MC_STATE].can.cd.uc[0];
+		gevcufunction.mc_hb_state_ctr = 0; // Reset heartbeat counter
+
+		// Queue CAN msg for sending
+		xQueueSendToBack(CanTxQHandle,&gevcufunction.canmsg[CID_GEVCUR_MC_STATE],4);
+	}
+
+	// Queue CAN msg for sending
+	xQueueSendToBack(CanTxQHandle,&gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1],4);
+
+
 	if (stepperstuff.CANsend != 0)
 	{
 		stepperstuff.CANsend = 0;
@@ -197,16 +211,25 @@ void GevcuUpdates(void)
 			gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[1] |= (1<<3);
 
 
+		/* ========== CPSWSCLV1 ============== */
 		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[2] = (gevcufunction.levelwindmode << 6); // Levelwind Mode 2 bits; Drum #1 selected
 		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[3] = 1; // Drum #1 active
 		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[4] = 0; // spare
 		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[5] = 0; // spare
 		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[6] = 0; // spare
 		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[7] = 0; // spare
-				// Queue CAN msg for sending
+		// Queue CAN msg for sending
 		xQueueSendToBack(CanTxQHandle,&gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1],4);
-		/* ========== CPSWSCLV1 ============== */
 
+		/* ========== Faux MC_STATE ========== */
+		gevcufunction.mc_hb_state_ctr += 1;
+		if (gevcufunction.mc_hb_state_ctr >= gevcufunction.mc_hb_state_k)
+		{
+			gevcufunction.mc_hb_state_ctr = 0; // Reset heartbeat counter
+
+			// Queue CAN msg for sending
+			xQueueSendToBack(CanTxQHandle,&gevcufunction.canmsg[CID_GEVCUR_MC_STATE],4);
+		}
 	}
 
 	/* Reset new & various flags. */

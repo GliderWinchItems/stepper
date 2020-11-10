@@ -15,6 +15,7 @@
 #include "stm32f4xx_hal.h"
 #include "adc_idx_v_struct.h"
 #include "CanTask.h"
+#include "mastercontroller_states.h"
 
 
 /* 
@@ -210,6 +211,9 @@ struct GEVCUFUNCTION
 	uint32_t ka_dmoc_r_k; // DMOC sending keepalive/command (ms)
 	uint32_t ka_dmoc_i_k; // DMOC failed to receive timeout (ms)
 	uint32_t hbct_k;      // Heartbeat ct: ticks between sending
+	uint32_t mc_hb_state_k; // MC state msg: time between hb timer ticks
+	uint32_t mc_hb_state_ctr; // Counter for timing hb
+
 
 	TimerHandle_t swtimer1; // Software timer1: command/keep-alive
 	TimerHandle_t swtimer2; // Software timer2: multiple purpose delay
@@ -262,8 +266,10 @@ struct GEVCUFUNCTION
 
 	uint8_t state;      // Gevcu main state
 	uint8_t mc_state;   // Faux MC state
+	uint8_t mc_state_prev;
 	uint8_t substateA;  // 
 	uint8_t substateB;  // spare substate 
+
 
 	/* CAN msgs */
 	struct CANTXQMSG canmsg[NUMCANMSGS];
