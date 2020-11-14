@@ -46,9 +46,11 @@ void gevcu_idx_v_struct_hardcode_params(struct GEVCULC* p)
 	p->cid_dmoc_cmd_torq   = CANID_DMOC_CMD_TORQ;  //0x46600000; I16_I16_I16_X6, DMOC: cmd: torq,copy,standby,status
 	p->cid_dmoc_cmd_regen  = CANID_DMOC_CMD_REGEN; //0x46800000; I16_I16_X_U8_U8,DMOC: cmd: watt,accel,degC,alive
 	// GEVCUR sends Control panel switches
-	p->cid_hb_cpswsv1_1 = CANID_HB_CPSWSV1_1;     //'31000000','CPMC',1,1,'S8_U8_7',S8:status,U8[7]: status,switches,drum sel,operational,spare,spare'
-	p->cid_mc_state = CANID_MC_STATE;             //'26000000','MC',1,5,'UNDEF','MC: Launch state msg'
-	p->cid_drum_tst_stepcmd	=  CANID_TST_STEPCMD; //'E4600000','U8_FF DRUM1: U8: Enable,Direction, FF: CL position
+	p->cid_drum_tst_stepcmd	= CANID_TST_STEPCMD;     //'E4600000','U8_FF DRUM1: U8: Enable,Direction, FF: CL position
+	p->cid_hb_cpswsv1_1     = CANID_HB_CPSWSV1_1;    //'31000000','CPMC',1,1,'S8_U8_7',S8:status,U8[7]: status,switches,drum sel,operational,spare,spare'
+	p->cid_hb_cpswsclv1_1   = CANID_HB_CPSWSCLV1_1;  //'31800000','CPMC',2,1,'S8_S16_FF_V','HB_CPSWSV1 1:S8:status, S16 CL: (+/-10000 )');
+	p->cid_cmd_levelwind_i1 = CANID_CMD_LEVELWIND_I1;//'B1000014','GENCMD',1,23,'U8_U8_U8_X4','1 incoming: U8:drum bits,U8:command code,X4:four byte value');
+	p->cid_mc_state         = CANID_MC_STATE;        //'26000000','MC',1,5,'U8_U8','MC: Launch state msg'
 
 
  // List of CAN ID's for setting up hw filter for incoming msgs
@@ -65,10 +67,11 @@ void gevcu_idx_v_struct_hardcode_params(struct GEVCULC* p)
 	p->cid_dmoc_hv_status  = CANID_DMOC_HV_STATUS; //0xCA000000; // 0x650 CANID_DMOC_HV_STATUS: I16_I16_X6,'DMOC: HV volts:amps, status
 	p->cid_dmoc_hv_temps   = CANID_DMOC_HV_TEMPS;  //0xCA200000; // 0x651 CANID_DMOC_HV_TEMPS:  U8_U8_U8,  'DMOC: Temperature:rotor,invert,stator
      // Others send
-	p->cid_gps_sync     = CANID_HB_TIMESYNC; //0x00400000; // CANID_HB_TIMESYNC:  U8 : GPS_1: U8 GPS time sync distribution msg-GPS time sync msg
+	p->cid_gps_sync        = CANID_HB_TIMESYNC;  //0x00400000; // CANID_HB_TIMESYNC:  U8 : GPS_1: U8 GPS time sync distribution msg-GPS time sync msg
+	 // Levelwind_1 sends : we receive
+   p->cid_cmd_levelwind_r1 = CANID_CMD_LEVELWIND_R1;//'B1000114','LEVELWIND',1,3,'U8_U8_U8_X4','1: U8:drum bits,U8:command code,X4:four byte value');
+   p->cid_hb_levelwind_1   = CANID_HB_LEVELWIND_1;  //'80000000','LEVELWIND',1,2,'S8_U8','DRUM 1: S8:Status,U8:state');
 
-	//p->cid_hb_cpv1 = CANID_HB_CPV1; //'E5000000',U8_U8_U8_U8_FF','HB_CPV1 1: U8:U8: bit fields,U8:drum bits,U8:spare,FF:CtlLever(0-100.0)');
-	//p->cid_mc_sys_state =  CANID_MC_SYSTEM_STATE; //'50000000','MC','U8','MC: System state: U8 = high|low nibbles ');
 
 	return;
 }

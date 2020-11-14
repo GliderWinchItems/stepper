@@ -94,9 +94,6 @@ void GevcuUpdates(void)
 		xQueueSendToBack(CanTxQHandle,&gevcufunction.canmsg[CID_GEVCUR_MC_STATE],4);
 	}
 
-	// Queue CAN msg for sending
-	xQueueSendToBack(CanTxQHandle,&gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1],4);
-
 
 	if (stepperstuff.CANsend != 0)
 	{
