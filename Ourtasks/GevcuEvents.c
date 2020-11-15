@@ -192,6 +192,8 @@ void GevcuEvents_04(void)
 		}
 	}
 
+	/* Heartbeat ctr for CID_GEVCUR_MC_STATE */
+	gevcufunction.mc_hb_state_ctr += 1; // Reset heartbeat counter
 
 	return;
 }

@@ -85,7 +85,8 @@ void GevcuUpdates(void)
 	}
 
 	/* ========== Faux MC_STATE ========== */
-	if (gevcufunction.canmsg[CID_GEVCUR_MC_STATE].can.cd.uc[0] != gevcufunction.mc_state_prev)
+	if ((gevcufunction.canmsg[CID_GEVCUR_MC_STATE].can.cd.uc[0] != gevcufunction.mc_state_prev) ||
+		(gevcufunction.mc_hb_state_ctr >= gevcufunction.mc_hb_state_k))
 	{
 		gevcufunction.mc_state_prev = gevcufunction.canmsg[CID_GEVCUR_MC_STATE].can.cd.uc[0];
 		gevcufunction.mc_hb_state_ctr = 0; // Reset heartbeat counter
@@ -93,7 +94,6 @@ void GevcuUpdates(void)
 		// Queue CAN msg for sending
 		xQueueSendToBack(CanTxQHandle,&gevcufunction.canmsg[CID_GEVCUR_MC_STATE],4);
 	}
-
 
 	if (stepperstuff.CANsend != 0)
 	{
@@ -220,16 +220,6 @@ void GevcuUpdates(void)
 			xQueueSendToBack(CanTxQHandle,&gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1],4);
 			gevcufunction.cpsws_ctr = xTaskGetTickCount(); // Save time CAN msg sent
 			gevcufunction.canpay_prev.ull = gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.ull;
-		}
-
-		/* ========== Faux MC_STATE ========== */
-		gevcufunction.mc_hb_state_ctr += 1;
-		if (gevcufunction.mc_hb_state_ctr >= gevcufunction.mc_hb_state_k)
-		{
-			gevcufunction.mc_hb_state_ctr = 0; // Reset heartbeat counter
-
-			// Queue CAN msg for sending
-			xQueueSendToBack(CanTxQHandle,&gevcufunction.canmsg[CID_GEVCUR_MC_STATE],4);
 		}
 	}
 

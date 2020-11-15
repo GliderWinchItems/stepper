@@ -46,7 +46,7 @@ void gevcu_func_init_init(struct GEVCUFUNCTION* p, struct ADCFUNCTION* padc)
 	p->ka_k       = (p->lc.ka_t);   // Gevcu polling timer (configTICK_RATE_HZ = 512)
 	p->keepalive_k= (p->lc.keepalive_t); // keep-alive timeout (timeout delay ms)
 	p->hbct_k     = (p->lc.hbct_t); // Heartbeat ct: ticks between sending msgs hv1:cur1
-	p->mc_hb_state_k = (p->lc.mc_hb_state_t)/16; // MC state msg: time between hb timer ticks
+	p->mc_hb_state_k = (p->lc.mc_hb_state_t)/8; // MC state msg: HB swtim1 timer ticks
 
 	/* Levelwind OFF-CENTER-TRACK switch simulation. */
 	p->levelwindmode = 0x3; // Initial = OFF
