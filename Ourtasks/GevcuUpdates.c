@@ -188,7 +188,7 @@ void GevcuUpdates(void)
 		// SAFE/ACTIVE switch
 		if (gevcufunction.psw[PSW_PR_SAFE]->db_on == SWP_OPEN )
 		{ // Here SAFE/ACTIVE switch is in ACTIVE position
-			gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[1] = 1;
+			gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[1] = (1<<7);
 		}
 		else
 		{	
