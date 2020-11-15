@@ -32,6 +32,12 @@ The CL calibration and ADC->pct position is done via ADC new readings notificati
 #include "LEDTask.h"
 #include "shiftregbits.h"
 #include "stepper_items.h"
+#include "LcdTask.h"
+#include "LcdmsgsetTask.h"
+#include "lcdmsg.h"
+#include "lcdprintf.h"
+
+
 
 #include "main.h"
 
@@ -133,6 +139,13 @@ void GevcuEvents_03(void)
 uint32_t dbgev04;
 uint32_t shamelesshack1 = 0;
 
+/* LCDI2C 4x20 msg. */
+static struct LCDMSGSET lcdi2cfunc;
+static void lcdi2cmsg10(union LCDSETVAR u){lcdi2cputs(&punitd4x20,LCDLEVELWIND,0,"LW nomode     ");}
+static void lcdi2cmsg11(union LCDSETVAR u){lcdi2cputs(&punitd4x20,LCDLEVELWIND,0,"LW OFF        ");}
+static void lcdi2cmsg12(union LCDSETVAR u){lcdi2cputs(&punitd4x20,LCDLEVELWIND,0,"LW CENTER     ");}
+static void lcdi2cmsg13(union LCDSETVAR u){lcdi2cputs(&punitd4x20,LCDLEVELWIND,0,"LW TRACK      ");}
+
 void GevcuEvents_04(void)
 {
 	gevcufunction.swtim1ctr += 1;
@@ -150,6 +163,35 @@ void GevcuEvents_04(void)
 		shamelesshack1 -= 1;
 		stepperstuff.CANsend = gevcufunction.swtim1ctr & 0x1;
 	}
+
+	/* Pushbutton to simuilate Levelwind OFF-CENTER-TRACK */
+	if (gevcufunction.psw[PSW_PB_ARM]->db_on != SW_CLOSED)
+	{ // Here, pushbutton is open
+		gevcufunction.pbarm_prev = SW_OPEN; 
+	}
+	else
+	{ // Here pushbutton is closed
+		if (gevcufunction.pbarm_prev != SW_CLOSED)
+		{ // Here pushbutton was previously open
+			gevcufunction.pbarm_prev = SW_CLOSED; 
+			// Advance levelwind mode (sequence: 01, 10, 11)
+			gevcufunction.levelwindmode = (gevcufunction.levelwindmode + 1) & 0x3;
+			if (gevcufunction.levelwindmode == 0) gevcufunction.levelwindmode = 1;
+
+			/* LCD message. */
+			switch (gevcufunction.levelwindmode)
+			{
+			case 0: lcdi2cfunc.ptr = lcdi2cmsg10; break;
+			case 1: lcdi2cfunc.ptr = lcdi2cmsg11; break;
+			case 2: lcdi2cfunc.ptr = lcdi2cmsg12; break;
+			case 3: lcdi2cfunc.ptr = lcdi2cmsg13; break;
+			}
+			// Place ptr to struct w ptr 
+	 		if (LcdmsgsetTaskQHandle != NULL)
+    			xQueueSendToBack(LcdmsgsetTaskQHandle, &lcdi2cfunc, 0);
+		}
+	}
+
 
 	return;
 }

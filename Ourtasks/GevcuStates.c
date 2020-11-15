@@ -472,10 +472,7 @@ void GevcuStates_GEVCU_ARM_TRANSITION(void)
  * void GevcuStates_GEVCU_ARM(void);
  * @brief	: Contactor & DMOC are ready. Keep fingers to yourself.
  * *************************************************************************/
-static void lcdi2cmsg10(union LCDSETVAR u){lcdi2cputs(&punitd4x20,LCDLEVELWIND,0,"LW nomode     ");}
-static void lcdi2cmsg11(union LCDSETVAR u){lcdi2cputs(&punitd4x20,LCDLEVELWIND,0,"LW OFF        ");}
-static void lcdi2cmsg12(union LCDSETVAR u){lcdi2cputs(&punitd4x20,LCDLEVELWIND,0,"LW CENTER     ");}
-static void lcdi2cmsg13(union LCDSETVAR u){lcdi2cputs(&punitd4x20,LCDLEVELWIND,0,"LW TRACK      ");}
+
 
 #define USETHEPREPSWITCHTOBREAKSTATE 
 
@@ -591,34 +588,7 @@ void GevcuStates_GEVCU_ARM(void)
 		gevcufunction.stepperlmbit = 0;	
 	}
 
-	/* Pushbutton to simuilate Levelwind OFF-CENTER-TRACK */
-	if (gevcufunction.psw[PSW_PB_ARM]->db_on != SW_CLOSED)
-	{ // Here, pushbutton is open
-		gevcufunction.pbarm_prev = SW_OPEN; 
-	}
-	else
-	{ // Here pushbutton is closed
-		if (gevcufunction.pbarm_prev != SW_CLOSED)
-		{ // Here pushbutton was previously open
-			gevcufunction.pbarm_prev = SW_CLOSED; 
-			// Advance levelwind mode (sequence: 01, 10, 11)
-			gevcufunction.levelwindmode = (gevcufunction.levelwindmode + 1) & 0x3;
-			if (gevcufunction.levelwindmode == 0) gevcufunction.levelwindmode = 1;
-
-			/* LCD message. */
-			switch (gevcufunction.levelwindmode)
-			{
-			case 0: lcdi2cfunc.ptr = lcdi2cmsg10; break;
-			case 1: lcdi2cfunc.ptr = lcdi2cmsg11; break;
-			case 2: lcdi2cfunc.ptr = lcdi2cmsg12; break;
-			case 3: lcdi2cfunc.ptr = lcdi2cmsg13; break;
-			}
-			// Place ptr to struct w ptr 
-	 		if (LcdmsgsetTaskQHandle != NULL)
-    			xQueueSendToBack(LcdmsgsetTaskQHandle, &lcdi2cfunc, 0);
-		}
-	}
-
+	
 
 	/* Compute torque request when the GevcuEvents_04 handling of the
       timer notification called dmoc_control_time, and dmoc_control_time

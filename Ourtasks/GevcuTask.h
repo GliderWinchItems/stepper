@@ -270,7 +270,8 @@ struct GEVCUFUNCTION
 	uint8_t substateA;  // 
 	uint8_t substateB;  // spare substate 
 
-
+	TickType_t cpsws_ctr; // RTOS tick count when last CPSWSV1 CAN msg sent
+	union CANDATA canpay_prev; // Compare change in CPSWSV1 payload
 	/* CAN msgs */
 	struct CANTXQMSG canmsg[NUMCANMSGS];
 

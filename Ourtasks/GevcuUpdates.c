@@ -171,7 +171,6 @@ void GevcuUpdates(void)
 
 
 		/* =========== CPSWSV1_1 ============= */
-		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[0] = 0; // Status = green, no issues
 		/*
 		  bit 7 – SAFE/ACTIVE (R-S toggle)
          0  = safe
@@ -184,6 +183,7 @@ void GevcuUpdates(void)
  bit 1 – (pushbutton) Actuate guillotine
  bit 0 – (pushbutton) Emergency
 */
+		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[0] = 0; // Status = green, no issues
 
 		// SAFE/ACTIVE switch
 		if (gevcufunction.psw[PSW_PR_SAFE]->db_on == SWP_OPEN )
@@ -207,16 +207,20 @@ void GevcuUpdates(void)
 		if (gevcufunction.psw[PSW_ZODOMTR]->db_on == SW_CLOSED)
 			gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[1] |= (1<<3);
 
-
-		/* ========== CPSWSCLV1 ============== */
 		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[2] = (gevcufunction.levelwindmode << 6); // Levelwind Mode 2 bits; Drum #1 selected
 		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[3] = 1; // Drum #1 active
 		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[4] = 0; // spare
 		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[5] = 0; // spare
 		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[6] = 0; // spare
 		gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.uc[7] = 0; // spare
-		// Queue CAN msg for sending
-		xQueueSendToBack(CanTxQHandle,&gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1],4);
+
+		if ( (gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.ull != gevcufunction.canpay_prev.ull) ||
+			 ((int)(xTaskGetTickCount() - (gevcufunction.cpsws_ctr + pdMS_TO_TICKS(500))) > 0) )
+		{	// Queue CAN msg for sending
+			xQueueSendToBack(CanTxQHandle,&gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1],4);
+			gevcufunction.cpsws_ctr = xTaskGetTickCount(); // Save time CAN msg sent
+			gevcufunction.canpay_prev.ull = gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSV1].can.cd.ull;
+		}
 
 		/* ========== Faux MC_STATE ========== */
 		gevcufunction.mc_hb_state_ctr += 1;
