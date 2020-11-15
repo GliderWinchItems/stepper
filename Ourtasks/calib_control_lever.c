@@ -74,28 +74,6 @@ static const struct BEEPQ beepf = { 60,20,1}; // We are waiting for your prompt
 static struct SERIALSENDTASKBCB* pbufmon1;    // HUARTMON (Monitor UART)
 static struct SERIALSENDTASKBCB* pbuflcd1;    // HUART (LCD uart)
 
-enum CLSTATE
-{
-	INITLCD,
-	INITLCD1,
-	INITLCD2,
-	INITLCD3,
-	INITLCD4,
-	INITLCD5,
-	INITLCD6,
-	INITLCD7,
-	CLOSE1,
-	CLOSE1WAIT,
-	CLOSE1MAX,
-	OPEN1,
-	OPEN1WAIT,
-	OPEN1MAX,
-	CLOSE2,
-	CLOSE2WAIT,
-	CLCREADY,   // CL calibration complete
-	SEQDONE,
-	SEQDONE1
-};
 
 struct SWITCHPTR* psw_cl_fs_no;
 struct SWITCHPTR* psw_cl_rst_n0;

@@ -84,6 +84,47 @@ void GevcuUpdates(void)
 		gevcufunction.outstat &= ~CNCTOUT05KA;	
 	}
 
+	/* ========== CPSWSCLV1_1 ============ */
+	// Current position compared to previous position
+	float ftmp;
+	int32_t ntmp;
+	if (gevcufunction.cl_hb_dur_ctr >= 2)
+	{ // Allow at least 2 timer ticks between msgs
+		ftmp = clfunc.curpos - gevcufunction.clpos_prev;
+		if (ftmp < 0) ftmp = -ftmp; //Absolute
+	
+		if ((gevcufunction.cl_hb_dur_ctr >= gevcufunction.cl_hb_dur_k) || 
+			(ftmp > 0.5f) ||
+			((clfunc.curpos == 0) && (gevcufunction.clpos_prev != 0)) ||			
+			((clfunc.curpos == 100.0f) &&  (gevcufunction.clpos_prev != 100.0f))
+			)
+		{ // Here, either HB timeout, or CL change sufficient for a msg
+			gevcufunction.cl_hb_dur_ctr = 0; // Reset HB time out
+			gevcufunction.clpos_prev = 	clfunc.curpos; // Update for next check
+
+			/* Set status */
+			if (clfunc.state != CLCREADY )
+			{ // Here, CL calibration not finished
+				gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSCLV1].can.cd.uc[0] = -1;
+			}
+			else
+			{ // Here, CL calibration is complete.
+				gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSCLV1].can.cd.uc[0] = 0;
+			}
+
+			/* Load s16 value into payload. */
+			ntmp = (clfunc.curpos * 100.0f); // Scale to +/-10,000
+			gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSCLV1].can.cd.uc[1] = ntmp >> 0;
+			gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSCLV1].can.cd.uc[2] = ntmp >> 8;
+
+			/* Load float into payload. */
+			payloadfloat(&gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSCLV1].can.cd.uc[3],clfunc.curpos);
+
+			// Queue CAN msg for sending
+			xQueueSendToBack(CanTxQHandle,&gevcufunction.canmsg[CID_GEVCUR_HB_CBSWSCLV1],4);
+		}
+	}	
+
 	/* ========== Faux MC_STATE ========== */
 	if ((gevcufunction.canmsg[CID_GEVCUR_MC_STATE].can.cd.uc[0] != gevcufunction.mc_state_prev) ||
 		(gevcufunction.mc_hb_state_ctr >= gevcufunction.mc_hb_state_k))

@@ -33,7 +33,8 @@ void gevcu_idx_v_struct_hardcode_params(struct GEVCULC* p)
 	p->keepalive_t= 2555; // keep-alive timeout (timeout delay ms)
 	p->hbct_t    = 1000; // Heartbeat ct: ticks between sending 
 	p->ka_dmoc_r_t = 2;  // DMOC keepalive/torque command (sw1tim ticks)
-	p->mc_hb_state_t = 256; // Time between MC_STATE heartbeats
+	p->mc_hb_state_t =  256; // MC_STATE:  hb duration (ms)
+	p->cl_hb_dur_t   = 1000; // CPSWSCLV1: hb duration (ms)
 
  // List of CAN ids we send
    //                      CANID_HEX      CANID_NAME             CAN_MSG_FMT     DESCRIPTION

@@ -106,14 +106,15 @@ NOTES:
 /* Number of different CAN id msgs this function sends. */
 //#define NUMCANMSGS 6
 //#define NUMCANMSGS 7 // Add 7th for sending control_law_v1 desired speed
-#define NUMCANMSGS 10 // Add 8th for sending CL position plus bits 
+#define NUMCANMSGS 11 // Add 8th for sending CL position plus bits 
 
 /* Indices for array below of "struct CANTXQMSG canmsg[NUMCANMSGS];" */
-#define CID_GEVCUR_KEEPALIVE_R  0 // cid_gevcur_keepalive_r
-#define CID_GEVCUR_CTL_LAWV1    6 // Desired speed commanded
-#define CID_GEVCUR_TST_STEPCMD  7 // CL position CAN msg
-#define CID_GEVCUR_HB_CBSWSV1   8 // Version 1 Control Panel switches
-#define CID_GEVCUR_MC_STATE     9 // Faux MC system state msgs
+#define CID_GEVCUR_KEEPALIVE_R   0 // cid_gevcur_keepalive_r
+#define CID_GEVCUR_CTL_LAWV1     6 // Desired speed commanded
+#define CID_GEVCUR_TST_STEPCMD   7 // CL position CAN msg
+#define CID_GEVCUR_HB_CBSWSV1    8 // Version 1 Control Panel switches
+#define CID_GEVCUR_MC_STATE      9 // Faux MC system state msgs
+#define CID_GEVCUR_HB_CBSWSCLV1 10 // Version 1 Control Panel Control Lever
 
 /* Number of switches for GEVCU task */
 #define NUMGEVCUPUSHBUTTONS 5
@@ -207,12 +208,16 @@ struct GEVCUFUNCTION
 	uint32_t ka_k;        // Gevcu polling timer
 	uint32_t keepalive_k;
 
-	uint32_t ka_gevcur_k; // GEVCUr keepalive/commmand from PC (ms) 
-	uint32_t ka_dmoc_r_k; // DMOC sending keepalive/command (ms)
-	uint32_t ka_dmoc_i_k; // DMOC failed to receive timeout (ms)
-	uint32_t hbct_k;      // Heartbeat ct: ticks between sending
-	uint32_t mc_hb_state_k; // MC state msg: time between hb timer ticks
-	uint32_t mc_hb_state_ctr; // Counter for timing hb
+	uint32_t ka_gevcur_k;    // GEVCUr keepalive/commmand from PC (ms) 
+	uint32_t ka_dmoc_r_k;    // DMOC sending keepalive/command (ms)
+	uint32_t ka_dmoc_i_k;    // DMOC failed to receive timeout (ms)
+	uint32_t hbct_k;         // Heartbeat ct: ticks between sending
+	uint32_t mc_hb_state_k;  // MC_STATE: time between hb timer ticks
+	uint32_t mc_hb_state_ctr;// MC_STATE: counter for timing hb
+	uint32_t cl_hb_dur_k;    // CPSWSCLV1: hb duration (ms)
+	uint32_t cl_hb_dur_ctr;  // CPSWSCLV1: counter for timing hb
+
+	float clpos_prev; // CL position previous (compute change)
 
 
 	TimerHandle_t swtimer1; // Software timer1: command/keep-alive

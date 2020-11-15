@@ -46,7 +46,8 @@ void gevcu_func_init_init(struct GEVCUFUNCTION* p, struct ADCFUNCTION* padc)
 	p->ka_k       = (p->lc.ka_t);   // Gevcu polling timer (configTICK_RATE_HZ = 512)
 	p->keepalive_k= (p->lc.keepalive_t); // keep-alive timeout (timeout delay ms)
 	p->hbct_k     = (p->lc.hbct_t); // Heartbeat ct: ticks between sending msgs hv1:cur1
-	p->mc_hb_state_k = (p->lc.mc_hb_state_t)/8; // MC state msg: HB swtim1 timer ticks
+	p->mc_hb_state_k = (p->lc.mc_hb_state_t)/8; // MC_STATE:  HB swtim1 timer ticks
+	p->cl_hb_dur_k   = (p->lc.cl_hb_dur_t)/8;   // CPSWSCLV1: HB swtim1 timer ticks
 
 	/* Levelwind OFF-CENTER-TRACK switch simulation. */
 	p->levelwindmode = 0x3; // Initial = OFF
@@ -92,6 +93,10 @@ void gevcu_func_init_init(struct GEVCUFUNCTION* p, struct ADCFUNCTION* padc)
 	  // Faux MC system state msgs
 	p->canmsg[CID_GEVCUR_MC_STATE].can.id  = p->lc.cid_mc_state; // CANID_MC_STATE','26000000','MC' MC: Launch state msg'
 	p->canmsg[CID_GEVCUR_MC_STATE].can.dlc = 2;
+ 	
+	  // Control Level position
+	p->canmsg[CID_GEVCUR_HB_CBSWSCLV1].can.id  = p->lc.cid_hb_cpswsclv1_1; // CANID_HB_CPSWSCLV1_1','31800000'
+	p->canmsg[CID_GEVCUR_HB_CBSWSCLV1].can.dlc = 7;
  	
 	return;
 }
