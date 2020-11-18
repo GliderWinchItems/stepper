@@ -182,9 +182,9 @@ void GevcuEvents_04(void)
 			switch (gevcufunction.levelwindmode)
 			{
 			case 0: lcdi2cfunc.ptr = lcdi2cmsg10; break;
-			case 1: lcdi2cfunc.ptr = lcdi2cmsg11; break;
-			case 2: lcdi2cfunc.ptr = lcdi2cmsg12; break;
-			case 3: lcdi2cfunc.ptr = lcdi2cmsg13; break;
+			case 3: lcdi2cfunc.ptr = lcdi2cmsg11; break;
+			case 1: lcdi2cfunc.ptr = lcdi2cmsg12; break;
+			case 2: lcdi2cfunc.ptr = lcdi2cmsg13; break;
 			}
 			// Place ptr to struct w ptr 
 	 		if (LcdmsgsetTaskQHandle != NULL)
